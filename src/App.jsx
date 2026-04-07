@@ -1,16 +1,18 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Login from './pages/Login'
+import Register from './pages/Register'
 import Feed from './pages/Feed'
-import ProtectedRoute from './components/ProtectedRoute' // <-- Импортируем нашу таможню
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Публичный роут, сюда пускаем всех */}
+        {/* Публичные роуты, сюда пускаем всех без проверки */}
         <Route path='/login' element={<Login />} />
-
-        {/* Защищенный роут Ленты */}
+        <Route path='/register' element={<Register />} />{' '}
+        {/* <-- Прорубили дверь */}
+        {/* Защищенные роуты*/}
         <Route
           path='/'
           element={
