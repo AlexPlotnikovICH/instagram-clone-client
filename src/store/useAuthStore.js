@@ -30,6 +30,25 @@ const useAuthStore = create(set => ({
       return false
     }
   },
+  register: async userData => {
+    try {
+      const payload = {
+        email: userData.email,
+        username: userData.username,
+        fullname: userData.fullName,
+        password: userData.password,
+      }
+
+      await api.post('/auth/register', payload)
+
+      return { success: true }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || 'Ошибка при регистрации'
+      console.error('Register Error:', errorMessage)
+      return { success: false, error: errorMessage }
+    }
+  },
 }))
 
 export default useAuthStore

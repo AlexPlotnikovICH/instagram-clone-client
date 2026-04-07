@@ -1,8 +1,12 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import logo from '../assets/icons/ICHGRAMlogo.svg'
+import useAuthStore from '../store/useAuthStore'
 
 export default function Register() {
+  const navigate = useNavigate()
+  const register = useAuthStore(state => state.register)
+
   const [email, setEmail] = useState('')
   const [fullName, setFullName] = useState('')
   const [username, setUsername] = useState('')
@@ -11,8 +15,23 @@ export default function Register() {
 
   const handleSubmit = async e => {
     e.preventDefault()
-    setError('')
-    console.log({ email, fullName, username, password })
+    setError('') // Сбрасываем старую ошибку перед новым броском
+
+    // Формируем объект, который ждет наш Zustand
+    const userData = { email, fullName, username, password }
+
+    // Ждем ответ от бэкенда.
+    const response = await register(userData)
+
+    if (response.success) {
+      // Успех: бэкенд создал юзера (статус 201).
+      // Отправляем его ручками вбивать пароль на страницу входа.
+      navigate('/login')
+    } else {
+      // Провал: бэкенд ругается (дубликат или пустые поля).
+      // Кладем текст ошибки в стейт, чтобы верстка показала красный текст.
+      setError(response.error)
+    }
   }
 
   return (
