@@ -1,14 +1,25 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import useAuthStore from '../store/useAuthStore'
 import logo from '../assets/icons/ICHGRAMlogo.svg'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  const handleSubmit = e => {
+  const navigate = useNavigate()
+  const login = useAuthStore(state => state.login)
+
+  const handleSubmit = async e => {
     e.preventDefault()
-    console.log(email, password)
+
+    // Ждем, пока Axios сходит на бэкенд и вернет true/false
+    const isSuccess = await login(email, password)
+
+    // Если токен получен и записан — перекидываем юзера в Ленту
+    if (isSuccess) {
+      navigate('/')
+    }
   }
 
   return (
