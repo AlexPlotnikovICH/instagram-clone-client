@@ -11,26 +11,28 @@ export default function Register() {
   const [fullName, setFullName] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [errors, setErrors] = useState({})
 
   const handleSubmit = async e => {
     e.preventDefault()
-    setError('') // Сбрасываем старую ошибку перед новым броском
+    setErrors({}) // Сбрасываем все ошибки перед новым запросом
 
-    // Формируем объект, который ждет наш Zustand
     const userData = { email, fullName, username, password }
-
-    // Ждем ответ от бэкенда.
     const response = await register(userData)
 
     if (response.success) {
-      // Успех: бэкенд создал юзера (статус 201).
-      // Отправляем его ручками вбивать пароль на страницу входа.
       navigate('/login')
     } else {
-      // Провал: бэкенд ругается (дубликат или пустые поля).
-      // Кладем текст ошибки в стейт, чтобы верстка показала красный текст.
-      setError(response.error)
+      setPassword('')
+
+      if (response.error.includes('существует')) {
+        // Вешаем ошибку конкретно на поле username, как в макете
+        setErrors({ username: 'This username or email is already taken.' })
+      } else if (response.error.includes('заполните')) {
+        setErrors({ general: 'Please fill in all fields.' })
+      } else {
+        setErrors({ general: response.error })
+      }
     }
   }
 
@@ -60,14 +62,26 @@ export default function Register() {
               className='w-full rounded-sm border border-gray-300 bg-gray-50 px-2 py-2 text-sm focus:border-gray-400 focus:outline-none'
             />
 
-            <input
-              type='text'
-              placeholder='Username'
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              className='w-full rounded-sm border border-gray-300 bg-gray-50 px-2 py-2 text-sm focus:border-gray-400 focus:outline-none'
-            />
-
+            <div className='flex w-full flex-col'>
+              <input
+                type='text'
+                placeholder='Username'
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                // Если есть ошибка username, рамка становится красной
+                className={`w-full rounded-sm border bg-gray-50 px-2 py-2 text-sm focus:outline-none ${
+                  errors.username
+                    ? 'border-red-500 focus:border-red-500'
+                    : 'border-gray-300 focus:border-gray-400'
+                }`}
+              />
+              {/* Точечный вывод текста ошибки */}
+              {errors.username && (
+                <p className='mt-1 text-left text-[11px] text-red-500'>
+                  {errors.username}
+                </p>
+              )}
+            </div>
             <input
               type='password'
               placeholder='Password'
@@ -76,12 +90,27 @@ export default function Register() {
               className='w-full rounded-sm border border-gray-300 bg-gray-50 px-2 py-2 text-sm focus:border-gray-400 focus:outline-none'
             />
 
-            {/* Блок вывода ошибки */}
-            {error && <p className='text-sm text-red-500 my-2'>{error}</p>}
-
-            <p className='my-3 text-xs text-gray-500'>
+            <p className='mt-2 text-center text-[12px] text-gray-500'>
               People who use our service may have uploaded your contact
-              information to Instagram.
+              information to Instagram.{' '}
+              <a href='#' className='font-semibold text-[#00376b]'>
+                Learn More
+              </a>
+            </p>
+            <p className='mb-4 text-center text-[12px] text-gray-500'>
+              By signing up, you agree to our{' '}
+              <a href='#' className='font-semibold text-[#00376b]'>
+                Terms
+              </a>
+              ,{' '}
+              <a href='#' className='font-semibold text-[#00376b]'>
+                Privacy Policy
+              </a>{' '}
+              and{' '}
+              <a href='#' className='font-semibold text-[#00376b]'>
+                Cookies Policy
+              </a>
+              .
             </p>
 
             <button
