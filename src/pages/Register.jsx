@@ -26,7 +26,7 @@ export default function Register() {
       setPassword('')
 
       if (response.error.includes('существует')) {
-        // Вешаем ошибку конкретно на поле username, как в макете
+        // ошибку  на поле username
         setErrors({ username: 'This username or email is already taken.' })
       } else if (response.error.includes('заполните')) {
         setErrors({ general: 'Please fill in all fields.' })
@@ -68,7 +68,7 @@ export default function Register() {
                 placeholder='Username'
                 value={username}
                 onChange={e => setUsername(e.target.value)}
-                // Если есть ошибка username, рамка становится красной
+                // Если ошибка username, рамка становится красной
                 className={`w-full rounded-sm border bg-gray-50 px-2 py-2 text-sm focus:outline-none ${
                   errors.username
                     ? 'border-red-500 focus:border-red-500'
