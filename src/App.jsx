@@ -12,7 +12,7 @@ function App() {
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
 
-        {/* Закрытая зона (работает только с токеном) */}
+        {/* Закрытая зона */}
         <Route
           path='/'
           element={
@@ -21,9 +21,9 @@ function App() {
             </ProtectedRoute>
           }
         >
-          {/* Вложенные роуты. Атрибут index значит, что Feed покажется по умолчанию на пути "/" */}
+          {/* Вложенные роуты.*/}
           <Route index element={<Feed />} />
-          {/* В будущем мы добавим сюда <Route path="profile" element={<Profile />} /> и т.д. */}
+          {/* <Route path="profile" element={<Profile />} /> и т.д. */}
         </Route>
       </Routes>
     </BrowserRouter>

@@ -11,7 +11,6 @@ export default function MainLayout() {
       {/* Правая динамическая часть */}
       {/* ml-[250px] - костыль чтобы контент не уехал под меню */}
       <div className='flex w-full flex-1 flex-col ml-[250px]'>
-        {/* Outlet - это портал. Сюда React Router будет выплевывать Feed, Profile и т.д. */}
         <Outlet />
       </div>
     </div>
