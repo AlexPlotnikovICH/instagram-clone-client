@@ -1,16 +1,9 @@
-import {
-  MoreHorizontal,
-  Heart,
-  MessageCircle,
-  Send,
-  Bookmark,
-} from 'lucide-react'
+import { MoreHorizontal, Heart, MessageCircle } from 'lucide-react'
 
 export default function Post({ post }) {
   return (
-    // Главный контейнер поста с динамической высотой и разделителем border-b
     <div className='flex w-[404px] flex-col border-b border-gray-200 pb-3'>
-      {/* 1. ШАПКА: Аватарка, Ник, Время */}
+      {/* 1. ШАПКА */}
       <div className='flex items-center justify-between py-3 px-1'>
         <div className='flex items-center gap-3'>
           <img
@@ -42,23 +35,15 @@ export default function Post({ post }) {
         />
       </div>
 
-      {/* 3. ПОДВАЛ (Actions, Likes, Caption) */}
+      {/* 3. ПОДВАЛ */}
       <div className='flex flex-col pt-3 px-1'>
-        {/* Панель иконок */}
-        <div className='flex justify-between mb-2'>
-          <div className='flex items-center gap-4'>
-            <button className='hover:text-gray-500 transition-colors'>
-              <Heart size={24} />
-            </button>
-            <button className='hover:text-gray-500 transition-colors'>
-              <MessageCircle size={24} />
-            </button>
-            <button className='hover:text-gray-500 transition-colors'>
-              <Send size={24} />
-            </button>
-          </div>
+        {/* Панель иконок*/}
+        <div className='flex items-center gap-4 mb-2'>
           <button className='hover:text-gray-500 transition-colors'>
-            <Bookmark size={24} />
+            <Heart size={24} />
+          </button>
+          <button className='hover:text-gray-500 transition-colors'>
+            <MessageCircle size={24} />
           </button>
         </div>
 
@@ -67,7 +52,7 @@ export default function Post({ post }) {
           {post.likes} likes
         </span>
 
-        {/* Текст поста (Никнейм + Описание) */}
+        {/* Текст поста */}
         <div className='text-[14px] mb-1'>
           <span className='font-bold text-gray-900 mr-2 cursor-pointer hover:text-gray-500'>
             {post.author.username}
