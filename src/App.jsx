@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Feed from './pages/Feed'
+import Explore from './pages/Explore'
 import ProtectedRoute from './components/ProtectedRoute'
 import MainLayout from './components/MainLayout'
 function App() {
@@ -12,7 +13,6 @@ function App() {
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
 
-        {/* Закрытая зона */}
         <Route
           path='/'
           element={
@@ -23,7 +23,7 @@ function App() {
         >
           {/* Вложенные роуты.*/}
           <Route index element={<Feed />} />
-          {/* <Route path="profile" element={<Profile />} /> и т.д. */}
+          <Route path='explore' element={<Explore />} />{' '}
         </Route>
       </Routes>
     </BrowserRouter>
