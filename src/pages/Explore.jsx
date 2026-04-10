@@ -1,4 +1,5 @@
 import React from 'react'
+import Footer from '../components/Footer'
 // Функция для генерации цветных паттернов-заглушек (data URI)
 // Это гарантирует, что картинки загрузятся всегда и мгновенно.
 const generatePatternUrl = (color1, color2, text) => {
@@ -37,8 +38,8 @@ export default function Explore() {
   ]
 
   return (
-    <div className='flex flex-col w-full items-center pt-10 pb-20'>
-      <div className='w-full max-w-[935px] px-4'>
+    <div className='flex flex-col w-full pt-10 pb-20 pl-25'>
+      <div className='w-full max-w-[935px]'>
         {/* СЕТКА */}
         <div className='grid grid-cols-3 gap-1 auto-rows-[300px]'>
           {dummyExplore.map((post, index) => {
@@ -66,6 +67,9 @@ export default function Explore() {
               </div>
             )
           })}
+        </div>
+        <div className='mt-20 w-full'>
+          <Footer />
         </div>
       </div>
     </div>
