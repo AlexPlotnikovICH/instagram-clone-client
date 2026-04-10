@@ -10,15 +10,19 @@ import {
 } from 'lucide-react'
 import logo from '../assets/icons/ICHGRAMlogo.svg'
 
-export default function Sidebar({ onToggleNotif }) {
+export default function Sidebar({ onToggleDrawer }) {
   const location = useLocation()
 
   const menuItems = [
     { name: 'Home', path: '/', icon: Home },
-    { name: 'Search', path: '/search', icon: Search },
+    { name: 'Search', action: () => onToggleDrawer('search'), icon: Search },
     { name: 'Explore', path: '/explore', icon: Compass },
     { name: 'Messages', path: '/messages', icon: MessageCircle },
-    { name: 'Notifications', action: onToggleNotif, icon: Heart }, // <-- ИЗМЕНЕНИЕ ТУТ
+    {
+      name: 'Notifications',
+      action: () => onToggleDrawer('notifications'),
+      icon: Heart,
+    },
     { name: 'Create', path: '/create', icon: PlusSquare },
     { name: 'Profile', path: '/profile', icon: User },
   ]
