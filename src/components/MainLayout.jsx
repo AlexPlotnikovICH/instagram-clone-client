@@ -1,10 +1,14 @@
 import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
-import { Search, X } from 'lucide-react' // <-- ДОБАВИЛИ ИКОНКИ
+import { Search, X } from 'lucide-react'
 import Sidebar from './Sidebar'
+import CreatePostModal from './CreatePostModal'
 
 export default function MainLayout() {
   const [activeDrawer, setActiveDrawer] = useState(null)
+
+  // Стейт для управления окном "Создать пост"
+  const [isCreatePostOpen, setIsCreatePostOpen] = useState(false)
 
   const toggleDrawer = drawerName => {
     if (activeDrawer === drawerName) {
@@ -26,7 +30,7 @@ export default function MainLayout() {
     },
   ]
 
-  // Фейковая база ВСЕХ юзеров (показываем, когда юзер что-то ищет)
+  // Фейковая база ВСЕХ юзеров
   const allUsers = [
     {
       id: 1,
@@ -54,8 +58,7 @@ export default function MainLayout() {
     },
   ]
 
-  // Фильтруем юзеров на лету.
-  // toLowerCase() нужен, чтобы поиск не ломался от больших/маленьких букв
+  // Фильтруем юзеров на лету
   const searchResults = allUsers.filter(
     user =>
       user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -79,7 +82,9 @@ export default function MainLayout() {
         <Sidebar
           onToggleDrawer={toggleDrawer}
           activeDrawer={activeDrawer}
-        />{' '}
+          // ДОБАВЛЕНО 2: Передаем функцию открытия в Сайдбар
+          onOpenCreate={() => setIsCreatePostOpen(true)}
+        />
       </div>
 
       <main className='flex-1 ml-[250px]'>
@@ -105,7 +110,6 @@ export default function MainLayout() {
         <div className='p-6 flex flex-col h-full'>
           <h2 className='text-2xl font-bold mb-8'>Search</h2>
 
-          {/* ИНПУТ ПОИСКА */}
           <div className='relative mb-6'>
             <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
               <Search size={16} className='text-gray-400' />
@@ -114,13 +118,12 @@ export default function MainLayout() {
               type='text'
               placeholder='Search'
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)} // Обновляем стейт при вводе
+              onChange={e => setSearchQuery(e.target.value)}
               className='w-full bg-gray-100 text-gray-900 rounded-md py-2 pl-10 pr-10 focus:outline-none focus:bg-white focus:ring-1 focus:ring-gray-300 transition-colors'
             />
-            {/* Крестик появляется только если в инпуте что-то написано */}
             {searchQuery && (
               <button
-                onClick={() => setSearchQuery('')} // Очищаем стейт при клике
+                onClick={() => setSearchQuery('')}
                 className='absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600'
               >
                 <X size={16} />
@@ -130,11 +133,8 @@ export default function MainLayout() {
 
           <hr className='border-gray-200 mb-4 -mx-6' />
 
-          {/* КОНТЕЙНЕР РЕЗУЛЬТАТОВ (со скроллом) */}
           <div className='flex-1 overflow-y-auto -mx-6 px-6'>
-            {/* РАЗВИЛКА ЛОГИКИ */}
             {searchQuery === '' ? (
-              // ЕСЛИ ПУСТО: Показываем Recent
               <>
                 <div className='flex items-center justify-between mb-4 mt-2'>
                   <h3 className='font-bold text-[16px]'>Recent</h3>
@@ -168,8 +168,7 @@ export default function MainLayout() {
                   </div>
                 ))}
               </>
-            ) : // ЕСЛИ ЕСТЬ ТЕКСТ: Показываем результаты поиска
-            searchResults.length > 0 ? (
+            ) : searchResults.length > 0 ? (
               searchResults.map(user => (
                 <div
                   key={user.id}
@@ -191,7 +190,6 @@ export default function MainLayout() {
                 </div>
               ))
             ) : (
-              // Если совпадений нет
               <div className='text-center text-gray-500 mt-10 text-[14px]'>
                 No results found.
               </div>
@@ -236,6 +234,12 @@ export default function MainLayout() {
           </div>
         </div>
       </div>
+
+      {/*  Вызов модалки создания поста */}
+      <CreatePostModal
+        isOpen={isCreatePostOpen}
+        onClose={() => setIsCreatePostOpen(false)}
+      />
     </div>
   )
 }

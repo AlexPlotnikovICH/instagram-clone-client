@@ -10,8 +10,12 @@ import {
 } from 'lucide-react'
 import logo from '../assets/icons/ICHGRAMlogo.svg'
 
-// Добавили activeDrawer в пропсы
-export default function Sidebar({ onToggleDrawer, activeDrawer }) {
+// ДОБАВЛЕНО: onOpenCreate в пропсы
+export default function Sidebar({
+  onToggleDrawer,
+  activeDrawer,
+  onOpenCreate,
+}) {
   const location = useLocation()
 
   const menuItems = [
@@ -24,7 +28,8 @@ export default function Sidebar({ onToggleDrawer, activeDrawer }) {
       action: () => onToggleDrawer('notifications'),
       icon: Heart,
     },
-    { name: 'Create', path: '/create', icon: PlusSquare },
+    // ДОБАВЛЕНО: Убрали path, добавили action для вызова модалки
+    { name: 'Create', action: onOpenCreate, icon: PlusSquare },
     { name: 'Profile', path: '/profile', icon: User },
   ]
 
@@ -38,7 +43,7 @@ export default function Sidebar({ onToggleDrawer, activeDrawer }) {
         {menuItems.map(item => {
           const Icon = item.icon
 
-          //  активен по URL ИЛИ активен по открытой шторке
+          // Активен по URL ИЛИ активен по открытой шторке
           const isActive = item.path
             ? location.pathname === item.path
             : activeDrawer === item.name.toLowerCase()
@@ -51,7 +56,6 @@ export default function Sidebar({ onToggleDrawer, activeDrawer }) {
             <>
               <Icon
                 size={24}
-                // Оставляем жирность для акцента
                 strokeWidth={isActive ? 3.0 : 2}
                 fill={
                   isActive && item.name === 'Notifications'
@@ -63,6 +67,7 @@ export default function Sidebar({ onToggleDrawer, activeDrawer }) {
             </>
           )
 
+          // Если у элемента есть action (Search, Notifications, Create) — рендерим кнопку
           if (item.action) {
             return (
               <button
@@ -75,6 +80,7 @@ export default function Sidebar({ onToggleDrawer, activeDrawer }) {
             )
           }
 
+          // Иначе (Home, Explore, Messages, Profile) — рендерим ссылку
           return (
             <Link key={item.name} to={item.path} className={commonClasses}>
               {content}
