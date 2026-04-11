@@ -4,7 +4,6 @@ import { Search, X } from 'lucide-react' // <-- ДОБАВИЛИ ИКОНКИ
 import Sidebar from './Sidebar'
 
 export default function MainLayout() {
-  // что б испольтзовать только 1 шторку сбоку ---
   const [activeDrawer, setActiveDrawer] = useState(null)
 
   const toggleDrawer = drawerName => {
@@ -15,7 +14,6 @@ export default function MainLayout() {
     }
   }
 
-  // логика поисковика
   // Стейт для хранения того, что вводит юзер
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -78,7 +76,10 @@ export default function MainLayout() {
   return (
     <div className='flex bg-gray-50 min-h-screen'>
       <div className='z-50 relative'>
-        <Sidebar onToggleDrawer={toggleDrawer} />
+        <Sidebar
+          onToggleDrawer={toggleDrawer}
+          activeDrawer={activeDrawer}
+        />{' '}
       </div>
 
       <main className='flex-1 ml-[250px]'>

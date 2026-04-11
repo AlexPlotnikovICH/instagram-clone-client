@@ -3,8 +3,11 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Feed from './pages/Feed'
 import Explore from './pages/Explore'
+import Messages from './pages/Messages'
 import ProtectedRoute from './components/ProtectedRoute'
 import MainLayout from './components/MainLayout'
+import NotFound from './pages/NotFound'
+
 function App() {
   return (
     <BrowserRouter>
@@ -13,6 +16,7 @@ function App() {
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
 
+        {/* Закрытая зона с Сайдбаром */}
         <Route
           path='/'
           element={
@@ -23,7 +27,9 @@ function App() {
         >
           {/* Вложенные роуты.*/}
           <Route index element={<Feed />} />
-          <Route path='explore' element={<Explore />} />{' '}
+          <Route path='explore' element={<Explore />} />
+          <Route path='messages' element={<Messages />} />{' '}
+          <Route path='*' element={<NotFound />} />
         </Route>
       </Routes>
     </BrowserRouter>

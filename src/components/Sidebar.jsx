@@ -10,7 +10,8 @@ import {
 } from 'lucide-react'
 import logo from '../assets/icons/ICHGRAMlogo.svg'
 
-export default function Sidebar({ onToggleDrawer }) {
+// Добавили activeDrawer в пропсы
+export default function Sidebar({ onToggleDrawer, activeDrawer }) {
   const location = useLocation()
 
   const menuItems = [
@@ -36,13 +37,31 @@ export default function Sidebar({ onToggleDrawer }) {
       <nav className='flex flex-col gap-1'>
         {menuItems.map(item => {
           const Icon = item.icon
-          // Если есть path, проверяем URL. Если нет (это кнопка) - она не может быть активна.
-          const isActive = item.path ? location.pathname === item.path : false
 
-          // Общие классы, чтобы и кнопки, и ссылки выглядели идентично
+          //  активен по URL ИЛИ активен по открытой шторке
+          const isActive = item.path
+            ? location.pathname === item.path
+            : activeDrawer === item.name.toLowerCase()
+
           const commonClasses = `flex items-center gap-4 rounded-md p-3 transition-colors hover:bg-gray-100 w-full text-left cursor-pointer ${
             isActive ? 'font-bold' : 'font-normal'
           }`
+
+          const content = (
+            <>
+              <Icon
+                size={24}
+                // Оставляем жирность для акцента
+                strokeWidth={isActive ? 3.0 : 2}
+                fill={
+                  isActive && item.name === 'Notifications'
+                    ? 'currentColor'
+                    : 'none'
+                }
+              />
+              <span className='text-[16px]'>{item.name}</span>
+            </>
+          )
 
           if (item.action) {
             return (
@@ -51,20 +70,14 @@ export default function Sidebar({ onToggleDrawer }) {
                 onClick={item.action}
                 className={commonClasses}
               >
-                <Icon size={24} strokeWidth={2} fill='none' />
-                <span className='text-[16px]'>{item.name}</span>
+                {content}
               </button>
             )
           }
 
           return (
             <Link key={item.name} to={item.path} className={commonClasses}>
-              <Icon
-                size={24}
-                strokeWidth={isActive ? 2.5 : 2}
-                fill={isActive ? 'currentColor' : 'none'}
-              />
-              <span className='text-[16px]'>{item.name}</span>
+              {content}
             </Link>
           )
         })}
