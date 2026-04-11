@@ -14,11 +14,9 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Публичная зона */}
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
 
-        {/* Закрытая зона с Сайдбаром */}
         <Route
           path='/'
           element={
@@ -27,18 +25,17 @@ function App() {
             </ProtectedRoute>
           }
         >
-          {/* Вложенные роуты */}
           <Route index element={<Feed />} />
           <Route path='explore' element={<Explore />} />
           <Route path='messages' element={<Messages />} />
 
-          {/* ИСПРАВЛЕННАЯ ПУТАНИЦА: profile теперь содержит вложенные роуты */}
-          <Route path='profile'>
-            <Route index element={<Profile />} />
-            <Route path='edit' element={<EditProfile />} />
-          </Route>
+          {/* Наш собственный профиль */}
+          <Route path='profile' element={<Profile />} />
+          <Route path='profile/edit' element={<EditProfile />} />
 
-          {/* ЛОВУШКА ДЛЯ ОШИБОК: Всегда последняя */}
+          {/*  Динамический роут для чужих профилей. */}
+          <Route path=':username' element={<Profile />} />
+
           <Route path='*' element={<NotFound />} />
         </Route>
       </Routes>

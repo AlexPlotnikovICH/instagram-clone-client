@@ -1,23 +1,26 @@
 import { useState } from 'react'
 import { Link as LinkIcon } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useParams, useLocation } from 'react-router-dom'
 import Footer from '../components/Footer'
 import PostModal from '../components/PostModal'
 
 export default function Profile() {
-  // Стейт для управления модалкой поста
+  const { username } = useParams()
+  const location = useLocation()
+
+  // Наш профиль — это только строгий путь /profile
+  const isOwnProfile = location.pathname === '/profile'
+
   const [selectedPost, setSelectedPost] = useState(null)
 
-  // Фейковые данные юзера
   const user = {
-    username: 'itcareerhub',
+    username: isOwnProfile ? 'itcareerhub' : username,
     bio: '• Гарантия помощи с трудоустройством в ведущие IT-компании\n• Выпускники зарабатывают от 45k евро\nБЕСПЛАТНАЯ ... more',
     link: 'bit.ly/3rpilbh',
     avatar: '/ich-avatar.png',
     stats: { posts: 129, followers: 9993, following: 59 },
   }
 
-  // Фейковые посты для сетки
   const posts = [
     {
       id: 1,
@@ -54,18 +57,25 @@ export default function Profile() {
   return (
     <div className='flex flex-col w-full min-h-screen pt-10 pb-10 pl-25 bg-white'>
       <div className='w-full max-w-[935px] pr-4 flex flex-col flex-1'>
-        {/* ========================================= */}
-        {/* БЛОК 1: ШАПКА ПРОФИЛЯ */}
-        {/* ========================================= */}
         <header className='flex gap-8 md:gap-20 mb-10 items-start px-4 md:px-0'>
           <div className='flex-shrink-0'>
-            <div className='w-20 h-20 md:w-36 md:h-36 rounded-full border border-gray-300 p-1'>
+            {isOwnProfile ? (
+              // СВОЙ ПРОФИЛЬ
               <img
                 src={user.avatar}
                 alt={user.username}
-                className='w-full h-full rounded-full object-cover'
+                className='w-20 h-20 md:w-36 md:h-36 rounded-full object-cover border border-gray-300'
               />
-            </div>
+            ) : (
+              // ЧУЖОЙ ПРОФИЛЬ: Один контейнер для градиента и картинка с белой рамкой.
+              <div className='w-20 h-20 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-yellow-400 to-fuchsia-600 p-[2px]'>
+                <img
+                  src={user.avatar}
+                  alt={user.username}
+                  className='w-full h-full rounded-full object-cover border-2 border-white bg-white'
+                />
+              </div>
+            )}
           </div>
 
           <div className='flex flex-col flex-1 mt-2 md:mt-0'>
@@ -73,13 +83,24 @@ export default function Profile() {
               <h2 className='text-xl md:text-2xl font-normal'>
                 {user.username}
               </h2>
-              {/* Исправленная кнопка: это просто Link со стилями кнопки */}
-              <Link
-                to='/profile/edit'
-                className='bg-gray-100 hover:bg-gray-200 text-black px-4 py-1.5 rounded-lg font-semibold text-[14px] transition-colors block text-center'
-              >
-                Edit profile
-              </Link>
+
+              {isOwnProfile ? (
+                <Link
+                  to='/profile/edit'
+                  className='bg-gray-100 hover:bg-gray-200 text-black px-4 py-1.5 rounded-lg font-semibold text-[14px] transition-colors block text-center'
+                >
+                  Edit profile
+                </Link>
+              ) : (
+                <div className='flex gap-2'>
+                  <button className='bg-[#0095f6] hover:bg-blue-600 text-white px-6 py-1.5 rounded-lg font-semibold text-[14px] transition-colors'>
+                    Follow
+                  </button>
+                  <button className='bg-gray-100 hover:bg-gray-200 text-black px-6 py-1.5 rounded-lg font-semibold text-[14px] transition-colors'>
+                    Message
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className='flex gap-6 mb-4 md:mb-6 text-[16px]'>
@@ -115,14 +136,11 @@ export default function Profile() {
 
         <hr className='border-gray-300 mb-0' />
 
-        {/* ========================================= */}
-        {/* БЛОК 2: СЕТКА ПОСТОВ */}
-        {/* ========================================= */}
         <div className='grid grid-cols-3 gap-1 md:gap-4 mt-1 md:mt-4 mb-20'>
           {posts.map(post => (
             <div
               key={post.id}
-              onClick={() => setSelectedPost(post)} // Вызываем модалку и передаем ей конкретный пост
+              onClick={() => setSelectedPost(post)}
               className='relative group cursor-pointer aspect-square'
             >
               <img
@@ -135,17 +153,11 @@ export default function Profile() {
           ))}
         </div>
 
-        {/* ========================================= */}
-        {/* БЛОК 3: ФУТЕР */}
-        {/* ========================================= */}
         <div className='mt-auto'>
           <Footer />
         </div>
       </div>
 
-      {/* ========================================= */}
-      {/* РЕНДЕР ПОРТАЛА (Модалка поста) */}
-      {/* ========================================= */}
       {selectedPost && (
         <PostModal post={selectedPost} onClose={() => setSelectedPost(null)} />
       )}
