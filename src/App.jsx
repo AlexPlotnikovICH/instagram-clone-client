@@ -6,6 +6,7 @@ import Explore from './pages/Explore'
 import Messages from './pages/Messages'
 import ProtectedRoute from './components/ProtectedRoute'
 import MainLayout from './components/MainLayout'
+import Profile from './pages/Profile'
 import NotFound from './pages/NotFound'
 
 function App() {
@@ -28,7 +29,8 @@ function App() {
           {/* Вложенные роуты.*/}
           <Route index element={<Feed />} />
           <Route path='explore' element={<Explore />} />
-          <Route path='messages' element={<Messages />} />{' '}
+          <Route path='messages' element={<Messages />} />
+          <Route path='profile' element={<Profile />} />
           <Route path='*' element={<NotFound />} />
         </Route>
       </Routes>
