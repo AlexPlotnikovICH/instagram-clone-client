@@ -7,6 +7,7 @@ import Messages from './pages/Messages'
 import ProtectedRoute from './components/ProtectedRoute'
 import MainLayout from './components/MainLayout'
 import Profile from './pages/Profile'
+import EditProfile from './pages/EditProfile'
 import NotFound from './pages/NotFound'
 
 function App() {
@@ -26,11 +27,18 @@ function App() {
             </ProtectedRoute>
           }
         >
-          {/* Вложенные роуты.*/}
+          {/* Вложенные роуты */}
           <Route index element={<Feed />} />
           <Route path='explore' element={<Explore />} />
           <Route path='messages' element={<Messages />} />
-          <Route path='profile' element={<Profile />} />
+
+          {/* ИСПРАВЛЕННАЯ ПУТАНИЦА: profile теперь содержит вложенные роуты */}
+          <Route path='profile'>
+            <Route index element={<Profile />} />
+            <Route path='edit' element={<EditProfile />} />
+          </Route>
+
+          {/* ЛОВУШКА ДЛЯ ОШИБОК: Всегда последняя */}
           <Route path='*' element={<NotFound />} />
         </Route>
       </Routes>
