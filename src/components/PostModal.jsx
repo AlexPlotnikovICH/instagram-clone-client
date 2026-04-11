@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import PostOptionsModal from './PostOptionsModal'
 import { createPortal } from 'react-dom'
 import {
   X,
@@ -11,6 +12,8 @@ import {
 } from 'lucide-react'
 
 export default function PostModal({ post, onClose }) {
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false)
+
   useEffect(() => {
     document.body.style.overflow = 'hidden'
     return () => {
@@ -20,7 +23,7 @@ export default function PostModal({ post, onClose }) {
 
   if (!post) return null
 
-  // ФЕЙКОВЫЕ ДАННЫЕ (Пока нет бэкенда, хардкодим их здесь)
+  // ФЕЙКОВЫЕ ДАННЫЕ
   const author = {
     username: 'itcareerhub',
     avatar: '/ich-avatar.png',
@@ -104,7 +107,7 @@ export default function PostModal({ post, onClose }) {
         {/* ПРАВАЯ КОЛОНКА (Интерфейс) */}
         {/* ========================================= */}
         <div className='w-full md:w-[40%] flex flex-col bg-white h-full max-h-[90vh]'>
-          {/* 1. ШАПКА (прибита гвоздями к верху) */}
+          {/* 1. ШАПКА */}
           <div className='flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0'>
             <div className='flex items-center gap-3 cursor-pointer'>
               <img
@@ -116,12 +119,15 @@ export default function PostModal({ post, onClose }) {
                 {author.username}
               </span>
             </div>
-            <MoreHorizontal className='cursor-pointer text-gray-700 hover:text-black' />
+            <MoreHorizontal
+              className='cursor-pointer text-gray-700 hover:text-black'
+              onClick={() => setIsOptionsOpen(true)}
+            />
           </div>
 
-          {/* 2. ТЕЛО (Зона скролла) */}
+          {/* 2. ТЕЛО */}
           <div className='flex-1 overflow-y-auto p-4 space-y-5'>
-            {/* Описание поста (Caption) */}
+            {/* Описание поста */}
             <div className='flex gap-3'>
               <img
                 src={author.avatar}
@@ -165,7 +171,7 @@ export default function PostModal({ post, onClose }) {
                     </div>
                   </div>
                 </div>
-                {/* Иконка лайка на комменте (появляется при наведении) */}
+                {/* Иконка лайка на комменте */}
                 <button className='text-gray-400 hover:text-black self-center p-2 opacity-0 group-hover:opacity-100 transition-opacity'>
                   <Heart size={14} />
                 </button>
@@ -173,7 +179,7 @@ export default function PostModal({ post, onClose }) {
             ))}
           </div>
 
-          {/* 3. ПОДВАЛ (прибит гвоздями к низу) */}
+          {/* 3. ПОДВАЛ */}
           <div className='border-t border-gray-200 flex-shrink-0'>
             <div className='p-4'>
               {/* Иконки действий */}
@@ -223,6 +229,12 @@ export default function PostModal({ post, onClose }) {
           </div>
         </div>
       </div>
+
+      {/* МЕНЮ ОПЦИЙ */}
+      <PostOptionsModal
+        isOpen={isOptionsOpen}
+        onClose={() => setIsOptionsOpen(false)}
+      />
     </div>,
     document.getElementById('modal-root'),
   )

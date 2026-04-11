@@ -10,7 +10,6 @@ import {
 } from 'lucide-react'
 import logo from '../assets/icons/ICHGRAMlogo.svg'
 
-// ДОБАВЛЕНО: onOpenCreate в пропсы
 export default function Sidebar({
   onToggleDrawer,
   activeDrawer,
@@ -28,7 +27,6 @@ export default function Sidebar({
       action: () => onToggleDrawer('notifications'),
       icon: Heart,
     },
-    // ДОБАВЛЕНО: Убрали path, добавили action для вызова модалки
     { name: 'Create', action: onOpenCreate, icon: PlusSquare },
     { name: 'Profile', path: '/profile', icon: User },
   ]
