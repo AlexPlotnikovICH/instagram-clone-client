@@ -1,14 +1,19 @@
-import { Settings, Link as LinkIcon } from 'lucide-react'
-import Footer from '../components/Footer'
+import { useState } from 'react'
+import { Link as LinkIcon } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import Footer from '../components/Footer'
+import PostModal from '../components/PostModal'
 
 export default function Profile() {
+  // Стейт для управления модалкой поста
+  const [selectedPost, setSelectedPost] = useState(null)
+
   // Фейковые данные юзера
   const user = {
     username: 'itcareerhub',
     bio: '• Гарантия помощи с трудоустройством в ведущие IT-компании\n• Выпускники зарабатывают от 45k евро\nБЕСПЛАТНАЯ ... more',
     link: 'bit.ly/3rpilbh',
-    avatar: 'src/assets/images/ich-avatar.png',
+    avatar: '/ich-avatar.png',
     stats: { posts: 129, followers: 9993, following: 59 },
   }
 
@@ -47,11 +52,7 @@ export default function Profile() {
   ]
 
   return (
-    // pl-25 — наш гвоздь, которым мы прибили макет к сайдбару.
-    // min-h-screen нужен, чтобы страница всегда была высотой с монитор.
     <div className='flex flex-col w-full min-h-screen pt-10 pb-10 pl-25 bg-white'>
-      {/* flex-1 — критично важно. Это заставит контейнер растянуться, 
-          и тогда mt-auto у Футера отработает правильно */}
       <div className='w-full max-w-[935px] pr-4 flex flex-col flex-1'>
         {/* ========================================= */}
         {/* БЛОК 1: ШАПКА ПРОФИЛЯ */}
@@ -72,14 +73,13 @@ export default function Profile() {
               <h2 className='text-xl md:text-2xl font-normal'>
                 {user.username}
               </h2>
-              <button className='bg-gray-100 hover:bg-gray-200 text-black px-4 py-1.5 rounded-lg font-semibold text-[14px] transition-colors'>
-                <Link
-                  to='/profile/edit' 
-                  className='bg-gray-100 hover:bg-gray-200 text-black px-4 py-1.5 rounded-lg font-semibold text-[14px] transition-colors block text-center'
-                >
-                  Edit profile
-                </Link>
-              </button>
+              {/* Исправленная кнопка: это просто Link со стилями кнопки */}
+              <Link
+                to='/profile/edit'
+                className='bg-gray-100 hover:bg-gray-200 text-black px-4 py-1.5 rounded-lg font-semibold text-[14px] transition-colors block text-center'
+              >
+                Edit profile
+              </Link>
             </div>
 
             <div className='flex gap-6 mb-4 md:mb-6 text-[16px]'>
@@ -97,7 +97,6 @@ export default function Profile() {
             </div>
 
             <div className='text-[14px]'>
-              {/* whitespace-pre-line решает проблему с переносами из строки */}
               <p className='whitespace-pre-line leading-relaxed mb-1'>
                 {user.bio}
               </p>
@@ -123,6 +122,7 @@ export default function Profile() {
           {posts.map(post => (
             <div
               key={post.id}
+              onClick={() => setSelectedPost(post)} // Вызываем модалку и передаем ей конкретный пост
               className='relative group cursor-pointer aspect-square'
             >
               <img
@@ -142,6 +142,13 @@ export default function Profile() {
           <Footer />
         </div>
       </div>
+
+      {/* ========================================= */}
+      {/* РЕНДЕР ПОРТАЛА (Модалка поста) */}
+      {/* ========================================= */}
+      {selectedPost && (
+        <PostModal post={selectedPost} onClose={() => setSelectedPost(null)} />
+      )}
     </div>
   )
 }
