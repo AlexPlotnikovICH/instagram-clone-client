@@ -10,7 +10,7 @@ import {
   LogOut,
 } from 'lucide-react'
 import logo from '../assets/icons/ICHGRAMlogo.svg'
-
+import useAuthStore from '../store/useAuthStore'
 export default function Sidebar({
   onToggleDrawer,
   activeDrawer,
@@ -18,12 +18,12 @@ export default function Sidebar({
 }) {
   const location = useLocation()
   const navigate = useNavigate()
+  const logout = useAuthStore(state => state.logout) // Достали функцию логаута
 
-  // Заглушка для будущего логаута
+  // Теперь это не заглушка, а реальный выход
   const handleLogout = () => {
-    // TODO: Здесь будет очистка localStorage (например, localStorage.removeItem('token'))
-    console.log('Выходим из матрицы...')
-    navigate('/login')
+    logout() // Стор сам удалит токен и юзера из localStorage
+    navigate('/login') // Выкидываем на страницу входа
   }
 
   const menuItems = [

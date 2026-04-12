@@ -1,20 +1,20 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { X, UploadCloud, Smile } from 'lucide-react'
+import { X, UploadCloud, Smile, Loader2 } from 'lucide-react'
+import api from '../api'
+import useAuthStore from '../store/useAuthStore' // Достаем реального юзера
 
 export default function CreatePostModal({ isOpen, onClose }) {
-  // Стейты для файла, превью и текста поста
   const [selectedFile, setSelectedFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState(null)
   const [caption, setCaption] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false) // Стейт для лоадера
+  const [error, setError] = useState('') // Стейт для ошибок
 
-  // Ссылка на невидимый инпут файла
   const fileInputRef = useRef(null)
 
-  // Фейковые данные юзера для правой колонки
-  const user = { username: 'skai_laba', avatar: '/ich-avatar.png' }
+  const currentUser = useAuthStore(state => state.user)
 
-  // Блокировка скролла
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -26,38 +26,64 @@ export default function CreatePostModal({ isOpen, onClose }) {
     }
   }, [isOpen])
 
-  // Очистка памяти от URL картинки при закрытии или смене файла
   useEffect(() => {
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl)
     }
   }, [previewUrl])
 
-  // Обработчик выбора файла
   const handleFileSelect = e => {
     const file = e.target.files[0]
     if (file) {
       setSelectedFile(file)
-      setPreviewUrl(URL.createObjectURL(file)) // Создаем временную ссылку для превью
+      setPreviewUrl(URL.createObjectURL(file))
+      setError('') // Сбрасываем ошибку при новом выборе
     }
   }
 
-  // Полная очистка при закрытии
   const handleClose = () => {
     setSelectedFile(null)
     setPreviewUrl(null)
     setCaption('')
+    setError('')
     onClose()
   }
 
-  // Обработчик кнопки Share (пока просто заглушка)
-  const handleShare = () => {
-    console.log('Sending to backend:', { file: selectedFile, caption })
-    alert('Готово к отправке на сервер!')
-    handleClose()
+  // БОЕВОЙ ОБРАБОТЧИК ОТПРАВКИ
+  const handleShare = async () => {
+    if (!selectedFile) return
+
+    try {
+      setIsSubmitting(true)
+      setError('')
+
+      // 1. Создаем объект FormData
+      const formData = new FormData()
+
+      // 2. Упаковываем данные строго по контракту
+      formData.append('image', selectedFile)
+      if (caption.trim()) {
+        formData.append('caption', caption)
+      }
+
+      // 3. Отправляем на бэкенд
+      await api.post('/posts', formData)
+
+      handleClose()
+      window.location.reload()
+    } catch (err) {
+      console.error('Ошибка создания поста:', err)
+      setError(
+        err.response?.data?.message || 'Failed to create post. Try again.',
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (!isOpen) return null
+
+  if (!currentUser) return null
 
   return createPortal(
     <div
@@ -67,6 +93,7 @@ export default function CreatePostModal({ isOpen, onClose }) {
       <button
         onClick={handleClose}
         className='absolute top-4 right-4 text-white hover:text-gray-300 z-50'
+        disabled={isSubmitting}
       >
         <X size={32} />
       </button>
@@ -75,29 +102,36 @@ export default function CreatePostModal({ isOpen, onClose }) {
         className='bg-white flex flex-col w-full max-w-[800px] max-h-[80vh] rounded-xl overflow-hidden relative'
         onClick={e => e.stopPropagation()}
       >
-        {/* ШАПКА МОДАЛКИ */}
         <div className='flex items-center justify-between p-3 border-b border-gray-200'>
-          {/* Пустой div для центрирования заголовка */}
           <div className='w-10'></div>
           <h1 className='font-bold text-[16px] flex-1 text-center'>
             Create new post
           </h1>
           <div className='w-10 text-right'>
-            {/* Кнопка Share появляется только если картинка загружена */}
             {previewUrl && (
               <button
                 onClick={handleShare}
-                className='text-[#0095f6] font-semibold text-[14px] hover:text-blue-800 transition-colors'
+                disabled={isSubmitting}
+                className='text-[#0095f6] font-semibold text-[14px] hover:text-blue-800 transition-colors disabled:opacity-50 flex items-center gap-1 justify-end w-full'
               >
-                Share
+                {isSubmitting ? (
+                  <Loader2 size={16} className='animate-spin' />
+                ) : (
+                  'Share'
+                )}
               </button>
             )}
           </div>
         </div>
 
-        {/* ТЕЛО МОДАЛКИ: Два состояния */}
+        {/* Вывод ошибки, если сервер ругнулся */}
+        {error && (
+          <div className='w-full bg-red-100 text-red-600 text-center py-2 text-sm font-semibold'>
+            {error}
+          </div>
+        )}
+
         {!previewUrl ? (
-          // СОСТОЯНИЕ 1: Картинка не выбрана (зона загрузки)
           <div className='flex flex-col items-center justify-center p-20 min-h-[400px]'>
             <UploadCloud
               size={64}
@@ -107,8 +141,6 @@ export default function CreatePostModal({ isOpen, onClose }) {
             <h2 className='text-xl font-normal mb-6'>
               Drag photos and videos here
             </h2>
-
-            {/* Невидимый инпут */}
             <input
               type='file'
               ref={fileInputRef}
@@ -116,7 +148,6 @@ export default function CreatePostModal({ isOpen, onClose }) {
               accept='image/*'
               className='hidden'
             />
-
             <button
               onClick={() => fileInputRef.current.click()}
               className='bg-[#0095f6] hover:bg-blue-600 text-white px-4 py-1.5 rounded-lg font-semibold text-[14px] transition-colors'
@@ -125,33 +156,36 @@ export default function CreatePostModal({ isOpen, onClose }) {
             </button>
           </div>
         ) : (
-          // СОСТОЯНИЕ 2: Картинка выбрана
           <div className='flex flex-col md:flex-row h-full max-h-[70vh]'>
-            {/* Левая колонка (Превью) */}
-            <div className='w-full md:w-[60%] bg-gray-50 flex items-center justify-center border-r border-gray-200 min-h-[300px]'>
+            <div className='w-full md:w-[60%] bg-gray-50 flex items-center justify-center border-r border-gray-200 min-h-[300px] relative'>
               <img
                 src={previewUrl}
                 alt='Preview'
-                className='max-w-full max-h-full object-contain'
+                className={`max-w-full max-h-full object-contain ${isSubmitting ? 'opacity-50' : ''}`}
               />
             </div>
 
-            {/* Правая колонка (Ввод текста) */}
             <div className='w-full md:w-[40%] flex flex-col bg-white'>
               <div className='flex items-center gap-3 p-4'>
                 <img
-                  src={user.avatar}
+                  src={
+                    currentUser.profile_image ||
+                    'https://via.placeholder.com/150'
+                  }
                   alt='author'
                   className='w-8 h-8 rounded-full object-cover border border-gray-200'
                 />
-                <span className='font-bold text-[14px]'>{user.username}</span>
+                <span className='font-bold text-[14px]'>
+                  {currentUser.username}
+                </span>
               </div>
 
               <textarea
                 value={caption}
                 onChange={e => setCaption(e.target.value)}
                 placeholder='Write a caption...'
-                className='w-full flex-1 p-4 resize-none focus:outline-none text-[16px]'
+                disabled={isSubmitting}
+                className='w-full flex-1 p-4 resize-none focus:outline-none text-[16px] disabled:bg-gray-50'
                 maxLength={2200}
               />
 

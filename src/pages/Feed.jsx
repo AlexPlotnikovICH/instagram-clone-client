@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Check, Loader2 } from 'lucide-react' // Добавил иконку загрузки
+import { Check, Loader2 } from 'lucide-react'
 import { useOutletContext } from 'react-router-dom'
 import Post from '../components/Post'
 import Footer from '../components/Footer'
-import api from '../api' // Наша "труба" с токеном
+import api from '../api'
 
 export default function Feed() {
   const { onOpenCreate, onToggleDrawer } = useOutletContext()
