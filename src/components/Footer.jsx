@@ -1,24 +1,38 @@
-export default function Footer() {
-  const links = [
-    'Home',
-    'Search',
-    'Explore',
-    'Messages',
-    'Notifications',
-    'Create',
+import { Link } from 'react-router-dom'
+
+export default function Footer({ onOpenCreate, onToggleDrawer }) {
+  const menuItems = [
+    { name: 'Home', path: '/' },
+    { name: 'Search', action: () => onToggleDrawer('search') },
+    { name: 'Explore', path: '/explore' },
+    { name: 'Messages', path: '/messages' },
+    { name: 'Notifications', action: () => onToggleDrawer('notifications') },
+    { name: 'Create', action: onOpenCreate },
   ]
 
   return (
-    // mt-auto прижимает футер к низу, если контента мало
     <footer className='mt-10 flex w-full flex-col items-center justify-center pb-10 text-xs text-gray-400'>
       <div className='mb-4 flex flex-wrap justify-center gap-x-4 gap-y-2'>
-        {links.map(link => (
-          <a key={link} href='#' className='hover:underline'>
-            {link}
-          </a>
-        ))}
+        {menuItems.map(item => {
+          if (item.path) {
+            return (
+              <Link key={item.name} to={item.path} className='hover:underline'>
+                {item.name}
+              </Link>
+            )
+          }
+          return (
+            <button
+              key={item.name}
+              onClick={item.action}
+              className='hover:underline cursor-pointer'
+            >
+              {item.name}
+            </button>
+          )
+        })}
       </div>
-      <p>© 2024 ICHgram</p>
+      <p>© 2026 ICHgram</p>
     </footer>
   )
 }

@@ -82,13 +82,18 @@ export default function MainLayout() {
         <Sidebar
           onToggleDrawer={toggleDrawer}
           activeDrawer={activeDrawer}
-          // ДОБАВЛЕНО 2: Передаем функцию открытия в Сайдбар
+          // Передаем функцию открытия в Сайдбар
           onOpenCreate={() => setIsCreatePostOpen(true)}
         />
       </div>
 
       <main className='flex-1 ml-[250px]'>
-        <Outlet />
+        <Outlet
+          context={{
+            onOpenCreate: () => setIsCreatePostOpen(true),
+            onToggleDrawer: toggleDrawer,
+          }}
+        />
       </main>
 
       {/* ТЕМНЫЙ ФОН */}

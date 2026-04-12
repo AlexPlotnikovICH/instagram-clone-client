@@ -1,16 +1,21 @@
 import { useState } from 'react'
 import { Link as LinkIcon } from 'lucide-react'
-import { Link, useParams, useLocation } from 'react-router-dom'
+import {
+  Link,
+  useParams,
+  useLocation,
+  useOutletContext,
+} from 'react-router-dom'
 import Footer from '../components/Footer'
 import PostModal from '../components/PostModal'
 
 export default function Profile() {
+  // ДОСТАЕМ ФУНКЦИИ ИЗ КОНТЕКСТА ЛЕЙАУТА
+  const { onOpenCreate, onToggleDrawer } = useOutletContext()
+
   const { username } = useParams()
   const location = useLocation()
-
-  // Наш профиль — это только строгий путь /profile
   const isOwnProfile = location.pathname === '/profile'
-
   const [selectedPost, setSelectedPost] = useState(null)
 
   const user = {
@@ -60,14 +65,12 @@ export default function Profile() {
         <header className='flex gap-8 md:gap-20 mb-10 items-start px-4 md:px-0'>
           <div className='flex-shrink-0'>
             {isOwnProfile ? (
-              // СВОЙ ПРОФИЛЬ
               <img
                 src={user.avatar}
                 alt={user.username}
                 className='w-20 h-20 md:w-36 md:h-36 rounded-full object-cover border border-gray-300'
               />
             ) : (
-              // ЧУЖОЙ ПРОФИЛЬ: Один контейнер для градиента и картинка с белой рамкой.
               <div className='w-20 h-20 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-yellow-400 to-fuchsia-600 p-[2px]'>
                 <img
                   src={user.avatar}
@@ -83,7 +86,6 @@ export default function Profile() {
               <h2 className='text-xl md:text-2xl font-normal'>
                 {user.username}
               </h2>
-
               {isOwnProfile ? (
                 <Link
                   to='/profile/edit'
@@ -127,8 +129,7 @@ export default function Profile() {
                 rel='noreferrer'
                 className='text-[#00376b] font-semibold flex items-center gap-1 hover:underline w-fit'
               >
-                <LinkIcon size={14} />
-                {user.link}
+                <LinkIcon size={14} /> {user.link}
               </a>
             </div>
           </div>
@@ -154,7 +155,8 @@ export default function Profile() {
         </div>
 
         <div className='mt-auto'>
-          <Footer />
+          {/*ПЕРЕДАЕМ ФУНКЦИИ В ФУТЕР */}
+          <Footer onOpenCreate={onOpenCreate} onToggleDrawer={onToggleDrawer} />
         </div>
       </div>
 
