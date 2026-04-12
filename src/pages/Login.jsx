@@ -71,18 +71,20 @@ export default function Login() {
             </form>
 
             {error && <p className='mt-4 text-xs text-red-500'>{error}</p>}
-
             <div className='mt-6 flex w-full items-center justify-between gap-2'>
               <div className='h-px w-full bg-gray-300'></div>
               <span className='text-xs font-semibold text-gray-500'>OR</span>
               <div className='h-px w-full bg-gray-300'></div>
             </div>
 
-            <a href='#' className='mt-6 text-xs text-[#00376b]'>
+            {/* Добавлен mt-5 и text-center */}
+            <Link
+              to='/reset'
+              className='mt-10 text-[12px] text-[#00376b] hover:underline mb-2 block text-center'
+            >
               Forgot password?
-            </a>
+            </Link>
           </div>
-
           {/* Блок "Don't have an account?" */}
           <div className='mt-3 flex w-full justify-center rounded-sm border border-gray-300 bg-white p-6 shadow-sm'>
             <p className='text-sm'>

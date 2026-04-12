@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import MainLayout from './components/MainLayout'
 import Profile from './pages/Profile'
 import EditProfile from './pages/EditProfile'
+import ResetPassword from './pages/ResetPassword'
 import NotFound from './pages/NotFound'
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
       <Routes>
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
+        <Route path='/reset' element={<ResetPassword />} />
 
         <Route
           path='/'
