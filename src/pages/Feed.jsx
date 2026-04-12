@@ -1,46 +1,65 @@
-import { Check } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Check, Loader2 } from 'lucide-react' // Добавил иконку загрузки
 import { useOutletContext } from 'react-router-dom'
 import Post from '../components/Post'
 import Footer from '../components/Footer'
+import api from '../api' // Наша "труба" с токеном
 
 export default function Feed() {
-  // пульт управления из контекста Outlet
   const { onOpenCreate, onToggleDrawer } = useOutletContext()
 
-  // Фейковые данные.
-  const dummyPosts = [
-    {
-      id: 1,
-      author: { username: 'sashaa', avatar: 'https://i.pravatar.cc/150?img=1' },
-      timeAgo: '2 wek',
-      image:
-        'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=600',
-      likes: '101 824',
-      caption: "It's golden, Ponyboy!",
-      commentsCount: 732,
-    },
-    {
-      id: 2,
-      author: {
-        username: 'alex_dev',
-        avatar: 'https://i.pravatar.cc/150?img=11',
-      },
-      timeAgo: '2 days',
-      image:
-        'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=600',
-      likes: '42',
-      caption: 'Learning React and Tailwind today',
-      commentsCount: 5,
-    },
-  ]
+  const [posts, setPosts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setLoading(true)
+        // Наш api.js сам подставит Bearer token в заголовки
+        const response = await api.get('/posts')
+        setPosts(response.data)
+      } catch (err) {
+        console.error('Ошибка загрузки ленты:', err)
+        setError('Could not load posts. Try again later.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPosts()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className='flex min-h-screen w-full items-center justify-center'>
+        <Loader2 className='animate-spin text-gray-400' size={40} />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className='flex min-h-screen w-full items-center justify-center text-red-500 font-semibold'>
+        {error}
+      </div>
+    )
+  }
 
   return (
     <div className='flex flex-col min-h-screen w-full items-start pl-24 bg-transparent pt-10'>
       <div className='flex flex-col w-full max-w-[847px]'>
         <div className='grid grid-cols-1 xl:grid-cols-2 gap-[39px] pb-10'>
-          {dummyPosts.map(post => (
-            <Post key={post.id} post={post} />
+          {/* Используем _id из MongoDB в качестве key */}
+          {posts.map(post => (
+            <Post key={post._id} post={post} />
           ))}
+
+          {posts.length === 0 && (
+            <p className='text-gray-500 text-center col-span-full'>
+              No posts yet. Be the first!
+            </p>
+          )}
         </div>
 
         <div className='flex flex-col items-center justify-center py-10 pb-20'>
@@ -50,12 +69,8 @@ export default function Feed() {
           <h3 className='text-lg font-semibold text-gray-900'>
             You've seen all the updates
           </h3>
-          <p className='text-sm text-gray-500'>
-            You have viewed all new publications
-          </p>
         </div>
 
-        {/*Передаем функции в футер */}
         <Footer onOpenCreate={onOpenCreate} onToggleDrawer={onToggleDrawer} />
       </div>
     </div>

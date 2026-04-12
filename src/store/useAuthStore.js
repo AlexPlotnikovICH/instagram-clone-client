@@ -1,35 +1,47 @@
 import { create } from 'zustand'
-import api from '../api/axios'
+import api from '../api'
+
+const getInitialUser = () => {
+  try {
+    const user = localStorage.getItem('user')
+    return user ? JSON.parse(user) : null
+  } catch {
+    return null
+  }
+}
 
 const useAuthStore = create(set => ({
-  user: null,
+  user: getInitialUser(),
   token: localStorage.getItem('token') || null,
   isAuthenticated: !!localStorage.getItem('token'),
 
-  login: async (email, password) => {
+  login: async (emailOrUsername, password) => {
     try {
-      // POST-запрос, передаем почту и пароль
-      const response = await api.post('/auth/login', { email, password })
+      const response = await api.post('/auth/login', {
+        email: emailOrUsername,
+        password,
+      })
 
-      // Достаем токен из ответа
-      const token = response.data.token
+      const { token, ...userData } = response.data
 
-      // Сохраняем в память браузера
+      if (!token) {
+        throw new Error('Сервер не вернул токен')
+      }
+
+      // Теперь userData — это объект {_id, fullname, username, email}
       localStorage.setItem('token', token)
+      localStorage.setItem('user', JSON.stringify(userData))
 
-      // Обновляем стейт Zustand
-      set({ token: token, isAuthenticated: true })
+      set({ user: userData, token, isAuthenticated: true })
 
-      // сигнал компоненту - успешно
-      return true
+      return { success: true }
     } catch (error) {
-      console.error(
-        'Login Error:',
-        error.response?.data?.message || error.message,
-      )
-      return false
+      const errorMessage = error.response?.data?.message || 'Login failed'
+      console.error('Login Error:', errorMessage)
+      return { success: false, error: errorMessage }
     }
   },
+
   register: async userData => {
     try {
       const payload = {
@@ -39,15 +51,25 @@ const useAuthStore = create(set => ({
         password: userData.password,
       }
 
+      // Отправляем запрос
       await api.post('/auth/register', payload)
 
+      // Бэкенд токен не дает, поэтому мы просто возвращаем success
+      // и пусть Register.jsx перекинет юзера на страницу логина
       return { success: true }
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message || 'Ошибка при регистрации'
+        error.response?.data?.message || 'Registration failed'
       console.error('Register Error:', errorMessage)
       return { success: false, error: errorMessage }
     }
+  },
+
+  // Функция для кнопки выхода
+  logout: () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    set({ user: null, token: null, isAuthenticated: false })
   },
 }))
 
