@@ -71,6 +71,11 @@ const useAuthStore = create(set => ({
     localStorage.removeItem('user')
     set({ user: null, token: null, isAuthenticated: false })
   },
+  // Функция для обновления данных юзера в стейте (после редактирования профиля)
+  updateUser: newUserData => {
+    localStorage.setItem('user', JSON.stringify(newUserData))
+    set({ user: newUserData })
+  },
 }))
 
 export default useAuthStore

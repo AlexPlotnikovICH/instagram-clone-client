@@ -1,15 +1,50 @@
+import { useState } from 'react'
 import { MoreHorizontal, Heart, MessageCircle } from 'lucide-react'
-import { formatDistanceToNow } from 'date-fns' // Импортируем магию времени
+import { formatDistanceToNow } from 'date-fns'
+import api from '../api' // Наш axios
+import useAuthStore from '../store/useAuthStore' // Чтобы знать свой ID
 
 export default function Post({ post }) {
-  // АТОМАРНО:
-  // post.user — теперь объект из бэкенда (username, profile_image)
-  // post.likes.length — считаем количество ID в массиве лайков
-  // post.createdAt — превращаем системную дату в "5 minutes ago"
+  const currentUser = useAuthStore(state => state.user)
+
+  // Инициализируем стейт из данных, пришедших с бэка
+  // Проверяем, есть ли наш ID в массиве лайков
+  const [isLiked, setIsLiked] = useState(post.likes?.includes(currentUser?._id))
+  const [likeCount, setLikeCount] = useState(post.likes?.length || 0)
 
   const timeAgo = post.createdAt
     ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })
     : 'just now'
+
+  // БОЕВАЯ ФУНКЦИЯ ЛАЙКА
+  const handleLike = async () => {
+    // 1. ЗАПОМИНАЕМ СТАРЫЕ ЗНАЧЕНИЯ (на случай отката)
+    const previousIsLiked = isLiked
+    const previousLikeCount = likeCount
+
+    // 2. OPTIMISTIC UPDATE: Меняем UI мгновенно
+    setIsLiked(!previousIsLiked)
+    setLikeCount(
+      previousIsLiked ? previousLikeCount - 1 : previousLikeCount + 1,
+    )
+
+    try {
+      // 3. ОТПРАВЛЯЕМ ЗАПРОС (бэк сам разберется, поставить лайк или убрать)
+      // Контракт: PUT /api/posts/:id/like
+      const response = await api.put(`/posts/${post._id}/like`)
+
+      // На всякий случай синхронизируем данные с тем, что реально вернул сервер
+      // (Сервер возвращает обновленный массив лайков)
+      const updatedLikes = response.data
+      setLikeCount(updatedLikes.length)
+      setIsLiked(updatedLikes.includes(currentUser?._id))
+    } catch (error) {
+      console.error('Like error:', error)
+      // 4. ROLLBACK: Если сервер упал, возвращаем как было
+      setIsLiked(previousIsLiked)
+      setLikeCount(previousLikeCount)
+    }
+  }
 
   return (
     <div className='flex w-[404px] flex-col border-b border-gray-200 pb-3'>
@@ -26,7 +61,7 @@ export default function Post({ post }) {
               {post.user?.username || 'unknown'}
             </span>
             <span className='text-gray-500'>• {timeAgo} •</span>
-            <button className='font-bold text-ichgram-blue hover:text-blue-800'>
+            <button className='font-bold text-ichgram-blue hover:text-blue-800 transition-colors'>
               follow
             </button>
           </div>
@@ -48,17 +83,23 @@ export default function Post({ post }) {
       {/* 3. ПОДВАЛ */}
       <div className='flex flex-col pt-3 px-1'>
         <div className='flex items-center gap-4 mb-2'>
-          <button className='hover:text-gray-500 transition-colors'>
-            <Heart size={24} />
+          {/* КНОПКА ЛАЙКА */}
+          <button
+            onClick={handleLike}
+            className={`transition-all duration-200 transform active:scale-125 ${
+              isLiked ? 'text-red-500' : 'text-gray-900 hover:text-gray-500'
+            }`}
+          >
+            <Heart size={24} fill={isLiked ? 'currentColor' : 'none'} />
           </button>
+
           <button className='hover:text-gray-500 transition-colors'>
             <MessageCircle size={24} />
           </button>
         </div>
 
-        {/* Считаем длину массива лайков */}
         <span className='font-bold text-[14px] text-gray-900 mb-1'>
-          {post.likes?.length || 0} likes
+          {likeCount} likes
         </span>
 
         <div className='text-[14px] mb-1'>
@@ -68,7 +109,6 @@ export default function Post({ post }) {
           <span className='text-gray-900'>{post.caption}</span>
         </div>
 
-        {/* Считаем количество комментариев */}
         <button className='text-[14px] text-gray-500 text-left mb-1 hover:text-gray-400'>
           View all {post.comments?.length || 0} comments
         </button>

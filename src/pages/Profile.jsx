@@ -8,23 +8,33 @@ import {
 } from 'react-router-dom'
 import Footer from '../components/Footer'
 import PostModal from '../components/PostModal'
+import useAuthStore from '../store/useAuthStore' // ПОДКЛЮЧИЛИ СТОР
 
 export default function Profile() {
-  // ДОСТАЕМ ФУНКЦИИ ИЗ КОНТЕКСТА ЛЕЙАУТА
   const { onOpenCreate, onToggleDrawer } = useOutletContext()
-
   const { username } = useParams()
   const location = useLocation()
+
   const isOwnProfile = location.pathname === '/profile'
   const [selectedPost, setSelectedPost] = useState(null)
 
-  const user = {
-    username: isOwnProfile ? 'itcareerhub' : username,
-    bio: '• Гарантия помощи с трудоустройством в ведущие IT-компании\n• Выпускники зарабатывают от 45k евро\nБЕСПЛАТНАЯ ... more',
-    link: 'bit.ly/3rpilbh',
-    avatar: '/ich-avatar.png',
-    stats: { posts: 129, followers: 9993, following: 59 },
-  }
+  // ДОСТАЕМ ТЕКУЩЕГО ЮЗЕРА ИЗ ПАМЯТИ
+  const currentUser = useAuthStore(state => state.user)
+
+  const displayUser = isOwnProfile
+    ? {
+        username: currentUser?.username || 'unknown',
+        fullname: currentUser?.fullname || '',
+        bio: currentUser?.bio || 'No bio yet...',
+        avatar: currentUser?.profile_image || 'https://via.placeholder.com/150', // Дефолтная аватарка
+        stats: { posts: 0, followers: 0, following: 0 }, // Статистику пока обнуляем
+      }
+    : {
+        username: username,
+        bio: 'Загрузка профиля...',
+        avatar: 'https://via.placeholder.com/150',
+        stats: { posts: 0, followers: 0, following: 0 },
+      }
 
   const posts = [
     {
@@ -37,27 +47,10 @@ export default function Profile() {
       image:
         'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=400',
     },
-    {
-      id: 3,
-      image:
-        'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=400',
-    },
-    {
-      id: 4,
-      image:
-        'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=400',
-    },
-    {
-      id: 5,
-      image:
-        'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=400',
-    },
-    {
-      id: 6,
-      image:
-        'https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80&w=400',
-    },
   ]
+
+  // Защита от белого экрана, если юзер не загрузился
+  if (!currentUser && isOwnProfile) return null
 
   return (
     <div className='flex flex-col w-full min-h-screen pt-10 pb-10 pl-25 bg-white'>
@@ -66,15 +59,15 @@ export default function Profile() {
           <div className='flex-shrink-0'>
             {isOwnProfile ? (
               <img
-                src={user.avatar}
-                alt={user.username}
+                src={displayUser.avatar}
+                alt={displayUser.username}
                 className='w-20 h-20 md:w-36 md:h-36 rounded-full object-cover border border-gray-300'
               />
             ) : (
               <div className='w-20 h-20 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-yellow-400 to-fuchsia-600 p-[2px]'>
                 <img
-                  src={user.avatar}
-                  alt={user.username}
+                  src={displayUser.avatar}
+                  alt={displayUser.username}
                   className='w-full h-full rounded-full object-cover border-2 border-white bg-white'
                 />
               </div>
@@ -84,7 +77,7 @@ export default function Profile() {
           <div className='flex flex-col flex-1 mt-2 md:mt-0'>
             <div className='flex flex-wrap items-center gap-4 mb-4 md:mb-6'>
               <h2 className='text-xl md:text-2xl font-normal'>
-                {user.username}
+                {displayUser.username}
               </h2>
               {isOwnProfile ? (
                 <Link
@@ -105,32 +98,32 @@ export default function Profile() {
               )}
             </div>
 
+            {/* вывод Fullname, если он есть */}
+            {displayUser.fullname && (
+              <div className='font-semibold text-[16px] mb-1'>
+                {displayUser.fullname}
+              </div>
+            )}
+
             <div className='flex gap-6 mb-4 md:mb-6 text-[16px]'>
               <span>
-                <span className='font-bold'>{user.stats.posts}</span> posts
+                <span className='font-bold'>{displayUser.stats.posts}</span>{' '}
+                posts
               </span>
               <span>
-                <span className='font-bold'>{user.stats.followers}</span>{' '}
+                <span className='font-bold'>{displayUser.stats.followers}</span>{' '}
                 followers
               </span>
               <span>
-                <span className='font-bold'>{user.stats.following}</span>{' '}
+                <span className='font-bold'>{displayUser.stats.following}</span>{' '}
                 following
               </span>
             </div>
 
             <div className='text-[14px]'>
               <p className='whitespace-pre-line leading-relaxed mb-1'>
-                {user.bio}
+                {displayUser.bio}
               </p>
-              <a
-                href={`https://${user.link}`}
-                target='_blank'
-                rel='noreferrer'
-                className='text-[#00376b] font-semibold flex items-center gap-1 hover:underline w-fit'
-              >
-                <LinkIcon size={14} /> {user.link}
-              </a>
             </div>
           </div>
         </header>
@@ -155,7 +148,6 @@ export default function Profile() {
         </div>
 
         <div className='mt-auto'>
-          {/*ПЕРЕДАЕМ ФУНКЦИИ В ФУТЕР */}
           <Footer onOpenCreate={onOpenCreate} onToggleDrawer={onToggleDrawer} />
         </div>
       </div>
