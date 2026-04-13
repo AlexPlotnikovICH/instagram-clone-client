@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { Link as LinkIcon } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import {
   Link,
   useParams,
@@ -8,7 +7,8 @@ import {
 } from 'react-router-dom'
 import Footer from '../components/Footer'
 import PostModal from '../components/PostModal'
-import useAuthStore from '../store/useAuthStore' // ПОДКЛЮЧИЛИ СТОР
+import useAuthStore from '../store/useAuthStore'
+import api from '../api'
 
 export default function Profile() {
   const { onOpenCreate, onToggleDrawer } = useOutletContext()
@@ -18,16 +18,36 @@ export default function Profile() {
   const isOwnProfile = location.pathname === '/profile'
   const [selectedPost, setSelectedPost] = useState(null)
 
-  // ДОСТАЕМ ТЕКУЩЕГО ЮЗЕРА ИЗ ПАМЯТИ
   const currentUser = useAuthStore(state => state.user)
+
+  const [userPosts, setUserPosts] = useState([])
+  const [isLoadingPosts, setIsLoadingPosts] = useState(true)
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      if (!isOwnProfile || !currentUser?._id) return
+
+      try {
+        setIsLoadingPosts(true)
+        const response = await api.get(`/posts/user/${currentUser._id}`)
+        setUserPosts(response.data)
+      } catch (error) {
+        console.error('Ошибка при скачивании постов:', error)
+      } finally {
+        setIsLoadingPosts(false)
+      }
+    }
+
+    fetchPosts()
+  }, [isOwnProfile, currentUser?._id])
 
   const displayUser = isOwnProfile
     ? {
         username: currentUser?.username || 'unknown',
         fullname: currentUser?.fullname || '',
         bio: currentUser?.bio || 'No bio yet...',
-        avatar: currentUser?.profile_image || 'https://via.placeholder.com/150', // Дефолтная аватарка
-        stats: { posts: 0, followers: 0, following: 0 }, // Статистику пока обнуляем
+        avatar: currentUser?.profile_image || 'https://via.placeholder.com/150',
+        stats: { posts: userPosts.length, followers: 0, following: 0 }, // Теперь тут реальная длина массива!
       }
     : {
         username: username,
@@ -36,20 +56,6 @@ export default function Profile() {
         stats: { posts: 0, followers: 0, following: 0 },
       }
 
-  const posts = [
-    {
-      id: 1,
-      image:
-        'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=400',
-    },
-    {
-      id: 2,
-      image:
-        'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=400',
-    },
-  ]
-
-  // Защита от белого экрана, если юзер не загрузился
   if (!currentUser && isOwnProfile) return null
 
   return (
@@ -98,7 +104,6 @@ export default function Profile() {
               )}
             </div>
 
-            {/* вывод Fullname, если он есть */}
             {displayUser.fullname && (
               <div className='font-semibold text-[16px] mb-1'>
                 {displayUser.fullname}
@@ -131,20 +136,30 @@ export default function Profile() {
         <hr className='border-gray-300 mb-0' />
 
         <div className='grid grid-cols-3 gap-1 md:gap-4 mt-1 md:mt-4 mb-20'>
-          {posts.map(post => (
-            <div
-              key={post.id}
-              onClick={() => setSelectedPost(post)}
-              className='relative group cursor-pointer aspect-square'
-            >
-              <img
-                src={post.image}
-                alt='Post thumbnail'
-                className='w-full h-full object-cover'
-              />
-              <div className='absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-200'></div>
+          {isLoadingPosts ? (
+            <div className='col-span-3 text-center text-gray-500 py-10 font-semibold'>
+              Loading posts...
             </div>
-          ))}
+          ) : userPosts.length === 0 ? (
+            <div className='col-span-3 text-center text-gray-500 py-10 font-semibold'>
+              No posts yet.
+            </div>
+          ) : (
+            userPosts.map(post => (
+              <div
+                key={post._id}
+                onClick={() => setSelectedPost(post)}
+                className='relative group cursor-pointer aspect-square bg-gray-100'
+              >
+                <img
+                  src={post.image}
+                  alt='Post thumbnail'
+                  className='w-full h-full object-cover'
+                />
+                <div className='absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-200'></div>
+              </div>
+            ))
+          )}
         </div>
 
         <div className='mt-auto'>
