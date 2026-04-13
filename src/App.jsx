@@ -35,8 +35,8 @@ function App() {
           <Route path='profile' element={<Profile />} />
           <Route path='profile/edit' element={<EditProfile />} />
 
-          {/*  Динамический роут для чужих профилей. */}
-          <Route path=':username' element={<Profile />} />
+          {/* Исправленный динамический роут для чужих профилей */}
+          <Route path='profile/:username' element={<Profile />} />
 
           <Route path='*' element={<NotFound />} />
         </Route>

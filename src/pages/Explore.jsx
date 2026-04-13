@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react'
 import Footer from '../components/Footer'
-import api from '../api' // Подключаем наш axios
+import PostModal from '../components/PostModal' // 1. Подключили модалку
+import api from '../api'
 
 export default function Explore() {
   const [explorePosts, setExplorePosts] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
+  // 2. Добавили стейт для открытия поста
+  const [selectedPost, setSelectedPost] = useState(null)
+
   useEffect(() => {
     const fetchExplorePosts = async () => {
       try {
         setIsLoading(true)
-        // Запрашиваем рандомные посты с бэкенда
         const response = await api.get('/posts/explore')
         setExplorePosts(response.data)
       } catch (error) {
@@ -37,12 +40,12 @@ export default function Explore() {
         ) : (
           <div className='grid grid-cols-3 gap-1 auto-rows-[300px]'>
             {explorePosts.map((post, index) => {
-              // Сохраняем логику сетки: большие картинки на позициях 2, 5, 12...
               const isLarge = index % 10 === 2 || index % 10 === 5
 
               return (
                 <div
                   key={post._id}
+                  onClick={() => setSelectedPost(post)} // 3. Повесили клик!
                   className={`relative group cursor-pointer bg-gray-100 ${isLarge ? 'row-span-2' : ''}`}
                 >
                   <img
@@ -66,6 +69,11 @@ export default function Explore() {
           <Footer />
         </div>
       </div>
+
+      {/* 4. Рендерим модальное окно, если выбран пост */}
+      {selectedPost && (
+        <PostModal post={selectedPost} onClose={() => setSelectedPost(null)} />
+      )}
     </div>
   )
 }
