@@ -10,7 +10,7 @@ export default function PostModal({ post, onClose }) {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false)
   const currentUser = useAuthStore(state => state.user)
 
-  // 1. Инициализируем локальный стейт на основе пропсов
+  // 1. Инициализируем локальный стейт
   const [isLiked, setIsLiked] = useState(post.likes?.includes(currentUser?._id))
   const [likeCount, setLikeCount] = useState(post.likes?.length || 0)
   const [comments, setComments] = useState(post.comments || [])
@@ -56,7 +56,7 @@ export default function PostModal({ post, onClose }) {
     }
   }
 
-  // --- ФУНКЦИЯ КОММЕНТАРИЯ ---
+  // --- ФУНКЦИЯ ДОБАВЛЕНИЯ КОММЕНТАРИЯ ---
   const handleAddComment = async e => {
     e.preventDefault()
     if (!commentText.trim()) return
@@ -65,11 +65,26 @@ export default function PostModal({ post, onClose }) {
       const response = await api.post(`/posts/${post._id}/comment`, {
         text: commentText,
       })
-      // Бэкенд теперь возвращает populate('comments.user'), так что UI не упадет
       setComments(response.data)
       setCommentText('')
     } catch (error) {
       console.error('Comment error:', error)
+    }
+  }
+
+  // --- ФУНКЦИЯ УДАЛЕНИЯ КОММЕНТАРИЯ ---
+  const handleDeleteComment = async commentId => {
+    if (!window.confirm('Удалить комментарий?')) return
+
+    try {
+      const response = await api.delete(
+        `/posts/${post._id}/comment/${commentId}`,
+      )
+      // Бэкенд возвращает обновленный массив
+      setComments(response.data)
+    } catch (error) {
+      console.error('Delete comment error:', error)
+      alert(error.response?.data?.message || 'Ошибка при удалении комментария')
     }
   }
 
@@ -128,9 +143,10 @@ export default function PostModal({ post, onClose }) {
               <div className='flex gap-3'>
                 <img
                   src={authorAvatar}
-                  className='w-8 h-8 rounded-full flex-shrink-0'
+                  className='w-8 h-8 rounded-full flex-shrink-0 object-cover'
+                  alt='author'
                 />
-                <div className='text-[14px]'>
+                <div className='text-[14px] pt-1'>
                   <span className='font-bold mr-2'>{post.user?.username}</span>
                   <span className='whitespace-pre-line'>{post.caption}</span>
                 </div>
@@ -138,25 +154,47 @@ export default function PostModal({ post, onClose }) {
             )}
 
             {/* СПИСОК КОММЕНТОВ */}
-            {comments.map(comment => (
-              <div key={comment._id} className='flex gap-3 justify-between'>
-                <div className='flex gap-3'>
-                  <img
-                    src={
-                      comment.user?.profile_image ||
-                      `https://ui-avatars.com/api/?name=${comment.user?.username || 'U'}&background=random`
-                    }
-                    className='w-8 h-8 rounded-full object-cover flex-shrink-0'
-                  />
-                  <div className='text-[14px]'>
-                    <span className='font-bold mr-2'>
-                      {comment.user?.username || 'User'}
-                    </span>
-                    <span>{comment.text}</span>
+            {comments.map(comment => {
+              // Прагматичная проверка прав на удаление
+              const canDelete =
+                comment.user?._id === currentUser?._id ||
+                post.user?._id === currentUser?._id
+
+              return (
+                <div
+                  key={comment._id}
+                  className='flex gap-3 justify-between items-start group'
+                >
+                  <div className='flex gap-3'>
+                    <img
+                      src={
+                        comment.user?.profile_image ||
+                        `https://ui-avatars.com/api/?name=${comment.user?.username || 'U'}&background=random`
+                      }
+                      className='w-8 h-8 rounded-full object-cover flex-shrink-0'
+                      alt='comment-author'
+                    />
+                    <div className='text-[14px] leading-tight pt-1'>
+                      <span className='font-bold mr-2'>
+                        {comment.user?.username || 'User'}
+                      </span>
+                      <span className='break-words'>{comment.text}</span>
+                    </div>
                   </div>
+
+                  {/* Кнопка удаления */}
+                  {canDelete && (
+                    <button
+                      onClick={() => handleDeleteComment(comment._id)}
+                      className='text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1'
+                      title='Удалить комментарий'
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
 
           {/* ПОДВАЛ (ЛАЙКИ) */}
@@ -169,7 +207,10 @@ export default function PostModal({ post, onClose }) {
                 >
                   <Heart size={24} fill={isLiked ? 'currentColor' : 'none'} />
                 </button>
-                <MessageCircle size={24} className='cursor-pointer' />
+                <MessageCircle
+                  size={24}
+                  className='cursor-pointer text-gray-900'
+                />
               </div>
               <div className='font-bold text-[14px]'>{likeCount} likes</div>
             </div>
