@@ -1,14 +1,17 @@
-import { useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { useState, useEffect } from 'react' // Добавил useEffect
+import { Outlet, useNavigate } from 'react-router-dom' // Добавил useNavigate
 import { Search, X } from 'lucide-react'
 import Sidebar from './Sidebar'
 import CreatePostModal from './CreatePostModal'
+import api from '../api' // Твой инстанс axios
 
 export default function MainLayout() {
   const [activeDrawer, setActiveDrawer] = useState(null)
-
-  // Стейт для управления окном "Создать пост"
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState([]) // Теперь это стейт
+  const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
 
   const toggleDrawer = drawerName => {
     if (activeDrawer === drawerName) {
@@ -18,53 +21,36 @@ export default function MainLayout() {
     }
   }
 
-  // Стейт для хранения того, что вводит юзер
-  const [searchQuery, setSearchQuery] = useState('')
+  // --- ЛОГИКА ПОИСКА (DEBOUNCE) ---
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([])
+      return
+    }
 
-  const recentSearches = [
-    {
-      id: 1,
-      username: 'sashaa',
-      name: 'Sasha',
-      avatar: 'https://i.pravatar.cc/150?img=1',
-    },
-  ]
+    const delayDebounceFn = setTimeout(async () => {
+      setIsLoading(true)
+      try {
+        const response = await api.get(`/users/search?query=${searchQuery}`)
+        setSearchResults(response.data)
+      } catch (error) {
+        console.error('Search error:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }, 500) // Задержка 500мс
 
-  // Фейковая база ВСЕХ юзеров
-  const allUsers = [
-    {
-      id: 1,
-      username: 'sashaa',
-      name: 'Sasha',
-      avatar: 'https://i.pravatar.cc/150?img=1',
-    },
-    {
-      id: 2,
-      username: 'sergey_dev',
-      name: 'Sergey',
-      avatar: 'https://i.pravatar.cc/150?img=11',
-    },
-    {
-      id: 3,
-      username: 'samantha_fox',
-      name: 'Sam Fox',
-      avatar: 'https://i.pravatar.cc/150?img=5',
-    },
-    {
-      id: 4,
-      username: 'john_doe',
-      name: 'John Doe',
-      avatar: 'https://i.pravatar.cc/150?img=8',
-    },
-  ]
+    return () => clearTimeout(delayDebounceFn)
+  }, [searchQuery])
 
-  // Фильтруем юзеров на лету
-  const searchResults = allUsers.filter(
-    user =>
-      user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
+  // Функция для перехода в профиль и закрытия шторки
+  const handleUserClick = username => {
+    setActiveDrawer(null)
+    setSearchQuery('')
+    navigate(`/profile/${username}`)
+  }
 
+  // Пока оставим заглушкой, раз бэкенд нотификаций еще не готов
   const dummyNotifications = [
     {
       id: 1,
@@ -82,7 +68,6 @@ export default function MainLayout() {
         <Sidebar
           onToggleDrawer={toggleDrawer}
           activeDrawer={activeDrawer}
-          // Передаем функцию открытия в Сайдбар
           onOpenCreate={() => setIsCreatePostOpen(true)}
         />
       </div>
@@ -96,7 +81,6 @@ export default function MainLayout() {
         />
       </main>
 
-      {/* ТЕМНЫЙ ФОН */}
       {activeDrawer !== null && (
         <div
           className='fixed inset-0 bg-black/60 z-30 transition-opacity cursor-pointer'
@@ -104,9 +88,7 @@ export default function MainLayout() {
         ></div>
       )}
 
-      {/* ========================================= */}
       {/* ШТОРКА 1: ПОИСК */}
-      {/* ========================================= */}
       <div
         className={`fixed top-0 left-[250px] h-screen w-[400px] bg-white z-40 shadow-xl border-r border-gray-200 transition-transform duration-300 ease-in-out flex flex-col ${
           activeDrawer === 'search' ? 'translate-x-0' : '-translate-x-full'
@@ -140,47 +122,25 @@ export default function MainLayout() {
 
           <div className='flex-1 overflow-y-auto -mx-6 px-6'>
             {searchQuery === '' ? (
-              <>
-                <div className='flex items-center justify-between mb-4 mt-2'>
-                  <h3 className='font-bold text-[16px]'>Recent</h3>
-                  <button className='text-ichgram-blue text-[14px] font-bold hover:text-blue-800 transition-colors'>
-                    Clear all
-                  </button>
-                </div>
-                {recentSearches.map(user => (
-                  <div
-                    key={user.id}
-                    className='flex items-center justify-between mb-4'
-                  >
-                    <div className='flex items-center gap-3'>
-                      <img
-                        src={user.avatar}
-                        alt={user.username}
-                        className='w-11 h-11 rounded-full object-cover border border-gray-100'
-                      />
-                      <div className='flex flex-col leading-tight'>
-                        <span className='font-bold text-[14px]'>
-                          {user.username}
-                        </span>
-                        <span className='text-gray-500 text-[14px]'>
-                          {user.name}
-                        </span>
-                      </div>
-                    </div>
-                    <button className='text-gray-400 hover:text-gray-600'>
-                      <X size={20} />
-                    </button>
-                  </div>
-                ))}
-              </>
+              <div className='mt-4 text-gray-500 text-[14px] font-semibold'>
+                Recent (History not implemented)
+              </div>
+            ) : isLoading ? (
+              <div className='text-center mt-10 text-gray-500'>
+                Searching...
+              </div>
             ) : searchResults.length > 0 ? (
               searchResults.map(user => (
                 <div
-                  key={user.id}
+                  key={user._id} // Используем _id из базы
+                  onClick={() => handleUserClick(user.username)}
                   className='flex items-center gap-3 mb-2 cursor-pointer hover:bg-gray-50 p-2 -mx-2 rounded-md transition-colors'
                 >
                   <img
-                    src={user.avatar}
+                    src={
+                      user.profile_image ||
+                      `https://ui-avatars.com/api/?name=${user.username}&background=random`
+                    }
                     alt={user.username}
                     className='w-11 h-11 rounded-full object-cover border border-gray-100'
                   />
@@ -189,7 +149,7 @@ export default function MainLayout() {
                       {user.username}
                     </span>
                     <span className='text-gray-500 text-[14px]'>
-                      {user.name}
+                      {user.fullname}
                     </span>
                   </div>
                 </div>
@@ -203,15 +163,12 @@ export default function MainLayout() {
         </div>
       </div>
 
-      {/* ========================================= */}
-      {/* ШТОРКА 2: НОТИФИКАЦИИ*/}
-      {/* ========================================= */}
+      {/* ШТОРКА 2: НОТИФИКАЦИИ (без изменений) */}
       <div
         className={`fixed top-0 left-[250px] h-screen w-[400px] bg-white z-40 shadow-xl border-r border-gray-200 transition-transform duration-300 ease-in-out overflow-y-auto ${activeDrawer === 'notifications' ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className='p-6'>
           <h2 className='text-2xl font-bold mb-6'>Notifications</h2>
-          <h3 className='font-bold text-[16px] mb-4'>New</h3>
           <div className='flex flex-col gap-4'>
             {dummyNotifications.map(notif => (
               <div key={notif.id} className='flex items-center justify-between'>
@@ -219,28 +176,21 @@ export default function MainLayout() {
                   <img
                     src={notif.user.avatar}
                     alt={notif.user.username}
-                    className='w-10 h-10 rounded-full object-cover border border-gray-100'
+                    className='w-10 h-10 rounded-full object-cover'
                   />
-                  <div className='text-[14px] leading-tight max-w-[200px]'>
-                    <span className='font-bold mr-1 cursor-pointer hover:text-gray-500'>
+                  <div className='text-[14px]'>
+                    <span className='font-bold mr-1'>
                       {notif.user.username}
                     </span>
-                    <span className='text-gray-900'>{notif.action}</span>
-                    <span className='text-gray-500 ml-1'>{notif.time}</span>
+                    <span>{notif.action}</span>
                   </div>
                 </div>
-                <img
-                  src={notif.postImage}
-                  alt='post thumbnail'
-                  className='w-10 h-10 rounded-md object-cover cursor-pointer hover:opacity-80 transition-opacity'
-                />
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/*  Вызов модалки создания поста */}
       <CreatePostModal
         isOpen={isCreatePostOpen}
         onClose={() => setIsCreatePostOpen(false)}
