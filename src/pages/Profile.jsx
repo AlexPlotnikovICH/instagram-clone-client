@@ -15,14 +15,15 @@ export default function Profile() {
   const { username: urlUsername } = useParams()
   const location = useLocation()
 
-  // Определяем, мой ли это профиль
-  const isOwnProfile =
-    location.pathname === '/profile' ||
-    urlUsername === useAuthStore.getState().user?.username
-
+  // Получаем текущего пользователя и функцию обновления счетчика из стора
   const currentUser = useAuthStore(state => state.user)
+  const updateFollowingCount = useAuthStore(state => state.updateFollowingCount)
 
-  // Состояния
+  // Определяем, является ли профиль личным
+  const isOwnProfile =
+    location.pathname === '/profile' || urlUsername === currentUser?.username
+
+  // Состояния компонента
   const [profileUser, setProfileUser] = useState(null)
   const [userPosts, setUserPosts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -34,18 +35,19 @@ export default function Profile() {
         setLoading(true)
         let targetUser = null
 
-        // 1. Получаем данные пользователя
-        if (isOwnProfile) {
-          targetUser = currentUser
-        } else {
-          // Если мы в гостях, стучимся в созданный нами роут на бэке
-          const userRes = await api.get(`/users/${urlUsername}`)
+        // 1. ПОЛУЧАЕМ ДАННЫЕ (Теперь всегда через API!)
+        const usernameToFetch = isOwnProfile
+          ? currentUser?.username
+          : urlUsername
+
+        if (usernameToFetch) {
+          const userRes = await api.get(`/users/${usernameToFetch}`)
           targetUser = userRes.data
         }
 
         setProfileUser(targetUser)
 
-        // 2. Если пользователь найден, качаем его посты по его ID
+        // 2. ПОЛУЧАЕМ ПОСТЫ
         if (targetUser?._id) {
           const postsRes = await api.get(`/posts/user/${targetUser._id}`)
           setUserPosts(postsRes.data)
@@ -60,7 +62,38 @@ export default function Profile() {
     fetchProfileData()
   }, [urlUsername, isOwnProfile, currentUser])
 
-  // Если данных еще нет
+  // Функция переключения подписки
+  const handleFollowToggle = async () => {
+    if (!profileUser || isOwnProfile) return
+
+    const wasFollowing = profileUser.isFollowing
+
+    try {
+      if (wasFollowing) {
+        await api.post(`/users/unfollow/${profileUser._id}`)
+      } else {
+        await api.post(`/users/follow/${profileUser._id}`)
+      }
+
+      // Оптимистичное обновление локального состояния профиля
+      setProfileUser(prev => ({
+        ...prev,
+        isFollowing: !wasFollowing,
+        followersCount: wasFollowing
+          ? prev.followersCount - 1
+          : prev.followersCount + 1,
+      }))
+
+      // Синхронизация глобального счетчика подписок в useAuthStore
+      if (updateFollowingCount) {
+        updateFollowingCount(!wasFollowing)
+      }
+    } catch (error) {
+      console.error('Ошибка при изменении статуса подписки:', error)
+    }
+  }
+
+  // Рендеринг состояний загрузки или ошибки
   if (loading && !profileUser) {
     return (
       <div className='pl-25 pt-10 font-semibold text-gray-500'>
@@ -69,7 +102,6 @@ export default function Profile() {
     )
   }
 
-  // Если юзер не найден
   if (!profileUser) {
     return (
       <div className='pl-25 pt-10 font-semibold text-red-500'>
@@ -101,16 +133,23 @@ export default function Profile() {
               {isOwnProfile ? (
                 <Link
                   to='/profile/edit'
-                  className='bg-gray-100 hover:bg-gray-200 text-black px-4 py-1.5 rounded-lg font-semibold text-[14px] transition-colors'
+                  className='bg-gray-100 hover:bg-gray-200 text-black px-4 py-1.5 rounded-lg font-semibold text-[14px] transition-colors cursor-pointer'
                 >
                   Edit profile
                 </Link>
               ) : (
                 <div className='flex gap-2'>
-                  <button className='bg-[#0095f6] hover:bg-blue-600 text-white px-6 py-1.5 rounded-lg font-semibold text-[14px]'>
-                    Follow
+                  <button
+                    onClick={handleFollowToggle}
+                    className={`${
+                      profileUser.isFollowing
+                        ? 'bg-gray-200 text-black'
+                        : 'bg-[#0095f6] text-white'
+                    } px-6 py-1.5 rounded-lg font-semibold text-[14px] transition-colors cursor-pointer`}
+                  >
+                    {profileUser.isFollowing ? 'Unfollow' : 'Follow'}
                   </button>
-                  <button className='bg-gray-100 hover:bg-gray-200 text-black px-6 py-1.5 rounded-lg font-semibold text-[14px]'>
+                  <button className='bg-gray-100 hover:bg-gray-200 text-black px-6 py-1.5 rounded-lg font-semibold text-[14px] transition-colors cursor-pointer'>
                     Message
                   </button>
                 </div>
@@ -121,15 +160,21 @@ export default function Profile() {
               {profileUser.fullname}
             </div>
 
-            <div className='flex gap-6 mb-4 text-[16px]'>
+            <div className='flex gap-6 mb-4 md:mb-6 text-[16px]'>
               <span>
                 <span className='font-bold'>{userPosts.length}</span> posts
               </span>
               <span>
-                <span className='font-bold'>0</span> followers
+                <span className='font-bold'>
+                  {profileUser.followersCount || 0}
+                </span>{' '}
+                followers
               </span>
               <span>
-                <span className='font-bold'>0</span> following
+                <span className='font-bold'>
+                  {profileUser.followingCount || 0}
+                </span>{' '}
+                following
               </span>
             </div>
 
@@ -143,7 +188,6 @@ export default function Profile() {
 
         <hr className='border-gray-300 mb-6' />
 
-        {/* СЕТКА ПОСТОВ */}
         <div className='grid grid-cols-3 gap-1 md:gap-4 mb-20'>
           {userPosts.length === 0 ? (
             <div className='col-span-3 text-center text-gray-400 py-10'>

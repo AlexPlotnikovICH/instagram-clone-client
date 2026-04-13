@@ -4,31 +4,56 @@ import { MoreHorizontal, Heart, MessageCircle } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import api from '../api'
 import useAuthStore from '../store/useAuthStore'
-import PostModal from './PostModal' // Подключаем модалку
+import PostModal from './PostModal'
 
 export default function Post({ post }) {
   const currentUser = useAuthStore(state => state.user)
+  const updateFollowingCount = useAuthStore(state => state.updateFollowingCount)
 
-  // СТЕЙТЫ ЛАЙКОВ
+  // --- СТЕЙТЫ ---
   const [isLiked, setIsLiked] = useState(post.likes?.includes(currentUser?._id))
   const [likeCount, setLikeCount] = useState(post.likes?.length || 0)
-
-  // СТЕЙТЫ КОММЕНТАРИЕВ И МОДАЛКИ
   const [comments, setComments] = useState(post.comments || [])
   const [commentText, setCommentText] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // Локальный стейт подписки для ленты (пока бэк не шлет статус в общем списке)
+  const [isFollowed, setIsFollowed] = useState(false)
 
   const timeAgo = post.createdAt
     ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })
     : 'just now'
 
-  // Логика ссылки: если пост наш -> идем в /profile, если чужой -> в /profile/никнейм
   const profileUrl =
     currentUser?._id === post.user?._id
       ? '/profile'
       : `/profile/${post.user?.username}`
 
-  // БОЕВАЯ ФУНКЦИЯ ЛАЙКА
+  // --- ЛОГИКА ПОДПИСКИ ---
+  const handleFollow = async () => {
+    if (!post.user?._id) return
+
+    try {
+      await api.post(`/users/follow/${post.user._id}`)
+
+      // Если запрос прошел — мы молодцы
+      setIsFollowed(true)
+      if (updateFollowingCount) updateFollowingCount(true)
+    } catch (error) {
+      // Обрабатываем 400 (уже подписан) как успех для интерфейса
+      if (error.response?.status === 400) {
+        setIsFollowed(true)
+      } else {
+        // Все остальные ошибки (500, 404) — в лог, это реально косяки
+        console.error(
+          'Критическая ошибка подписки:',
+          error.response?.data?.message || error.message,
+        )
+      }
+    }
+  }
+
+  // --- ЛОГИКА ЛАЙКА ---
   const handleLike = async () => {
     const previousIsLiked = isLiked
     const previousLikeCount = likeCount
@@ -50,20 +75,17 @@ export default function Post({ post }) {
     }
   }
 
-  // БОЕВАЯ ФУНКЦИЯ КОММЕНТАРИЯ
+  // --- ЛОГИКА КОММЕНТАРИЯ ---
   const handleAddComment = async e => {
     e.preventDefault()
     if (!commentText.trim()) return
 
     try {
-      // Контракт бэкенда: POST /api/posts/:id/comment, передаем text
       const response = await api.post(`/posts/${post._id}/comment`, {
         text: commentText,
       })
-
-      // Бэкенд возвращает обновленный массив комментариев
       setComments(response.data)
-      setCommentText('') // Очищаем инпут
+      setCommentText('')
     } catch (error) {
       console.error('Comment error:', error)
     }
@@ -74,7 +96,6 @@ export default function Post({ post }) {
       {/* 1. ШАПКА */}
       <div className='flex items-center justify-between py-3 px-1'>
         <div className='flex items-center gap-3'>
-          {/* ССЫЛКА НА ПРОФИЛЬ (Аватар) */}
           <Link to={profileUrl}>
             <img
               src={
@@ -85,13 +106,9 @@ export default function Post({ post }) {
               }
               alt={post.user?.username}
               className='h-8 w-8 rounded-full object-cover border border-gray-100 cursor-pointer'
-              onError={e => {
-                e.target.src = `https://ui-avatars.com/api/?name=${post.user?.username || 'U'}&background=random`
-              }}
             />
           </Link>
           <div className='flex items-center gap-1.5 text-[14px]'>
-            {/* ССЫЛКА НА ПРОФИЛЬ (Никнейм) */}
             <Link
               to={profileUrl}
               className='font-bold text-gray-900 cursor-pointer hover:text-gray-500'
@@ -99,9 +116,16 @@ export default function Post({ post }) {
               {post.user?.username || 'unknown'}
             </Link>
             <span className='text-gray-500'>• {timeAgo} •</span>
-            <button className='font-bold text-ichgram-blue hover:text-blue-800 transition-colors'>
-              follow
-            </button>
+
+            {/* КНОПКА FOLLOW: показываем только если это не мы и мы еще не нажали */}
+            {currentUser?._id !== post.user?._id && !isFollowed && (
+              <button
+                onClick={handleFollow}
+                className='font-bold text-[#0095f6] hover:text-blue-800 transition-colors cursor-pointer'
+              >
+                follow
+              </button>
+            )}
           </div>
         </div>
         <button className='p-1 hover:bg-gray-50 rounded-full transition-colors'>
@@ -130,7 +154,6 @@ export default function Post({ post }) {
             <Heart size={24} fill={isLiked ? 'currentColor' : 'none'} />
           </button>
 
-          {/* КНОПКА ОТКРЫТИЯ МОДАЛКИ С КОММЕНТАРИЯМИ */}
           <button
             onClick={() => setIsModalOpen(true)}
             className='hover:text-gray-500 transition-colors'
@@ -153,7 +176,6 @@ export default function Post({ post }) {
           <span className='text-gray-900'>{post.caption}</span>
         </div>
 
-        {/* ССЫЛКА НА ВСЕ КОММЕНТАРИИ */}
         <button
           onClick={() => setIsModalOpen(true)}
           className='text-[14px] text-gray-500 text-left mb-1 hover:text-gray-400'
@@ -161,7 +183,6 @@ export default function Post({ post }) {
           View all {comments.length} comments
         </button>
 
-        {/* ФОРМА ДОБАВЛЕНИЯ КОММЕНТАРИЯ */}
         <form
           onSubmit={handleAddComment}
           className='flex items-center justify-between pb-1 mt-1'
@@ -184,7 +205,6 @@ export default function Post({ post }) {
         </form>
       </div>
 
-      {/* РЕНДЕР МОДАЛКИ (передаем актуальные комменты) */}
       {isModalOpen && (
         <PostModal
           post={{ ...post, comments: comments }}
