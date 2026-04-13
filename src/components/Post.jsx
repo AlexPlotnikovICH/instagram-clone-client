@@ -18,7 +18,7 @@ export default function Post({ post }) {
 
   // БОЕВАЯ ФУНКЦИЯ ЛАЙКА
   const handleLike = async () => {
-    // 1. ЗАПОМИНАЕМ СТАРЫЕ ЗНАЧЕНИЯ (на случай отката)
+    // 1. ЗАПОМИНАЕМ СТАРЫЕ ЗНАЧЕНИЯ
     const previousIsLiked = isLiked
     const previousLikeCount = likeCount
 
@@ -29,7 +29,7 @@ export default function Post({ post }) {
     )
 
     try {
-      // 3. ОТПРАВЛЯЕМ ЗАПРОС (бэк сам разберется, поставить лайк или убрать)
+      // 3. ОТПРАВЛЯЕМ ЗАПРОС
       // Контракт: PUT /api/posts/:id/like
       const response = await api.put(`/posts/${post._id}/like`)
 
@@ -52,9 +52,19 @@ export default function Post({ post }) {
       <div className='flex items-center justify-between py-3 px-1'>
         <div className='flex items-center gap-3'>
           <img
-            src={post.user?.profile_image || 'https://via.placeholder.com/150'}
+            src={
+              // Если это пост текущего юзера, берем его свежую аватарку из стора
+              post.user?._id === currentUser?._id
+                ? currentUser?.profile_image
+                : post.user?.profile_image ||
+                  `https://ui-avatars.com/api/?name=${post.user?.username || 'U'}&background=random`
+            }
             alt={post.user?.username}
             className='h-8 w-8 rounded-full object-cover border border-gray-100'
+            onError={e => {
+              // Если вдруг и это не прогрузилось, ставим стандартную букву
+              e.target.src = `https://ui-avatars.com/api/?name=${post.user?.username || 'U'}&background=random`
+            }}
           />
           <div className='flex items-center gap-1.5 text-[14px]'>
             <span className='font-bold text-gray-900 cursor-pointer hover:text-gray-500'>

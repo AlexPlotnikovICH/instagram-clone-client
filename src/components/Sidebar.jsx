@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import logo from '../assets/icons/ICHGRAMlogo.svg'
 import useAuthStore from '../store/useAuthStore'
+
 export default function Sidebar({
   onToggleDrawer,
   activeDrawer,
@@ -18,12 +19,13 @@ export default function Sidebar({
 }) {
   const location = useLocation()
   const navigate = useNavigate()
-  const logout = useAuthStore(state => state.logout) // Достали функцию логаута
 
-  // Теперь это не заглушка, а реальный выход
+  const user = useAuthStore(state => state.user)
+  const logout = useAuthStore(state => state.logout)
+
   const handleLogout = () => {
-    logout() // Стор сам удалит токен и юзера из localStorage
-    navigate('/login') // Выкидываем на страницу входа
+    logout()
+    navigate('/login')
   }
 
   const menuItems = [
@@ -37,7 +39,12 @@ export default function Sidebar({
       icon: Heart,
     },
     { name: 'Create', action: onOpenCreate, icon: PlusSquare },
-    { name: 'Profile', path: '/profile', icon: User },
+    {
+      name: 'Profile',
+      path: '/profile',
+      // Если в стейте есть хоть какая-то строка с фото — помечаем как 'avatar'
+      icon: user?.profile_image ? 'avatar' : User,
+    },
   ]
 
   return (
@@ -46,11 +53,8 @@ export default function Sidebar({
         <img src={logo} alt='ICHGRAM' className='w-28' />
       </Link>
 
-      {/* flex-1 заставляет этот блок занять всё свободное место, выталкивая Logout вниз */}
       <nav className='flex flex-col gap-1 flex-1'>
         {menuItems.map(item => {
-          const Icon = item.icon
-
           const isActive = item.path
             ? location.pathname === item.path
             : activeDrawer === item.name.toLowerCase()
@@ -59,8 +63,27 @@ export default function Sidebar({
             isActive ? 'font-bold' : 'font-normal'
           }`
 
-          const content = (
-            <>
+          // Упрощенная логика отрисовки
+          const renderIcon = () => {
+            // Если это пункт Profile и у нас есть данные фото
+            if (item.name === 'Profile' && item.icon === 'avatar') {
+              return (
+                <img
+                  src={user.profile_image}
+                  alt='My profile'
+                  className={`w-6 h-6 rounded-full object-cover border ${isActive ? 'border-black' : 'border-gray-200'}`}
+                  // Если Base64 битый или ссылка сдохла — просто меняем src на прозрачный пиксель
+                  // или даем сработать стандартной иконке ниже
+                  onError={e => {
+                    e.target.style.display = 'none'
+                    // Форсим перерисовку на иконку 
+                  }}
+                />
+              )
+            }
+
+            const Icon = item.icon
+            return (
               <Icon
                 size={24}
                 strokeWidth={isActive ? 3.0 : 2}
@@ -70,6 +93,12 @@ export default function Sidebar({
                     : 'none'
                 }
               />
+            )
+          }
+
+          const content = (
+            <>
+              {renderIcon()}
               <span className='text-[16px]'>{item.name}</span>
             </>
           )
@@ -94,16 +123,11 @@ export default function Sidebar({
         })}
       </nav>
 
-      {/* КНОПКА ВЫХОДА */}
       <button
         onClick={handleLogout}
         className='flex items-center gap-4 rounded-md p-3 transition-colors hover:bg-gray-100 w-full text-left cursor-pointer mt-auto text-gray-700 hover:text-red-500 hover:bg-red-50 group'
       >
-        <LogOut
-          size={24}
-          strokeWidth={2}
-          className='group-hover:text-red-500'
-        />
+        <LogOut size={24} className='group-hover:text-red-500' />
         <span className='text-[16px] font-normal'>Log out</span>
       </button>
     </div>

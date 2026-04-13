@@ -19,7 +19,8 @@ export default function EditProfile() {
   // Стейты для файла аватара
   const [selectedFile, setSelectedFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState(
-    currentUser?.profile_image || 'https://via.placeholder.com/150',
+    currentUser?.profile_image ||
+      `https://ui-avatars.com/api/?name=${currentUser?.username || 'User'}&background=random`,
   )
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -132,7 +133,7 @@ export default function EditProfile() {
         <form onSubmit={e => e.preventDefault()} className='w-full'>
           <div className='relative'>
             <label htmlFor='fullname' className={labelClasses}>
-              Full Name
+              Username
             </label>
             <input
               id='fullname'
@@ -171,7 +172,7 @@ export default function EditProfile() {
 
           <div className='relative'>
             <label htmlFor='bio' className={labelClasses}>
-              Bio
+              About
             </label>
             <textarea
               id='bio'
