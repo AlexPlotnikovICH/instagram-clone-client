@@ -23,14 +23,13 @@ export default function PostModal({ post, onClose }) {
 
   if (!post) return null
 
-  // ФЕЙКОВЫЕ ДАННЫЕ
+  // РЕАЛЬНЫЕ ДАННЫЕ ИЗ БАЗЫ
   const author = {
-    username: 'itcareerhub',
-    avatar: '/ich-avatar.png',
+    username: post?.user?.username || 'unknown',
+    avatar: post?.user?.profile_image || 'https://via.placeholder.com/150',
   }
 
-  const caption =
-    'Потрясающие новости пришли к нам из Черногории! Проект по поддержке бездомных животных TailBook, в разработке которого участвуют сразу 9 наших стажеров, будет представлен на Web Summit 2024 в Португалии🔥\n\nМы поздравляем наших студентов, приглашаем вас на Web Summit и предлагаем стать частью огромного сообщества...'
+  const caption = post?.caption || ''
 
   const mockComments = [
     {
