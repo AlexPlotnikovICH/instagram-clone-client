@@ -37,7 +37,6 @@ export default function PostModal({ post, onClose }) {
     const previousIsLiked = isLiked
     const previousLikeCount = likeCount
 
-    // Оптимистичное обновление UI
     setIsLiked(!previousIsLiked)
     setLikeCount(
       previousIsLiked ? previousLikeCount - 1 : previousLikeCount + 1,
@@ -55,7 +54,18 @@ export default function PostModal({ post, onClose }) {
       setLikeCount(previousLikeCount)
     }
   }
-
+  // --- ФУНКЦИЯ УДАЛЕНИЯ ПОСТА ---
+  const handleDeletePost = async id => {
+    try {
+      await api.delete(`/posts/${id}`)
+      alert('Пост успешно удален!')
+      // костыль: чтобы пост исчез из ленты, просто перезагружаем страницу.
+      window.location.reload()
+    } catch (error) {
+      console.error('Delete post error:', error)
+      alert(error.response?.data?.message || 'Ошибка при удалении поста')
+    }
+  }
   // --- ФУНКЦИЯ ДОБАВЛЕНИЯ КОММЕНТАРИЯ ---
   const handleAddComment = async e => {
     e.preventDefault()
@@ -155,7 +165,7 @@ export default function PostModal({ post, onClose }) {
 
             {/* СПИСОК КОММЕНТОВ */}
             {comments.map(comment => {
-              // Прагматичная проверка прав на удаление
+              // проверка прав на удаление
               const canDelete =
                 comment.user?._id === currentUser?._id ||
                 post.user?._id === currentUser?._id
@@ -243,6 +253,9 @@ export default function PostModal({ post, onClose }) {
       <PostOptionsModal
         isOpen={isOptionsOpen}
         onClose={() => setIsOptionsOpen(false)}
+        isOwnPost={isOwnPost}
+        postId={post._id}
+        onDeletePost={handleDeletePost}
       />
     </div>,
     document.getElementById('modal-root'),

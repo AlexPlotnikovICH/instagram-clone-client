@@ -1,38 +1,56 @@
-export default function PostOptionsModal({ isOpen, onClose }) {
+export default function PostOptionsModal({
+  isOpen,
+  onClose,
+  isOwnPost,
+  postId,
+  onDeletePost,
+}) {
   if (!isOpen) return null
 
   const handleAction = actionName => {
-    console.log(`Выбрано действие: ${actionName}`)
-    // Если выбрали Copy Link, можно даже реально скопировать в буфер
     if (actionName === 'Copy link') {
-      navigator.clipboard.writeText(window.location.href)
-      alert('Ссылка скопирована!')
+      // Формируем прямую ссылку на пост, даже если самого роута на фронте пока нет
+      const postUrl = `${window.location.origin}/p/${postId}`
+      navigator.clipboard.writeText(postUrl)
+      alert(`Ссылка скопирована:\n${postUrl}`)
+    } else if (actionName === 'Edit' || actionName === 'Go to post') {
+      alert('Функция в разработке 🛠')
+    } else if (actionName === 'Delete') {
+      if (window.confirm('Точно удалить этот пост? Действие необратимо.')) {
+        onDeletePost(postId)
+      }
     }
-    onClose() // Закрываем меню после любого действия
+
+    onClose()
   }
 
   return (
     <div
-      // z-[60] критически важно, чтобы перекрыть первую модалку
       className='fixed inset-0 z-[60] flex items-center justify-center bg-black/65'
       onClick={onClose}
     >
       <div
         className='bg-white w-[400px] rounded-xl flex flex-col overflow-hidden text-[14px]'
-        onClick={e => e.stopPropagation()} // Блокировка клика, чтобы не закрылось
+        onClick={e => e.stopPropagation()}
       >
-        <button
-          onClick={() => handleAction('Delete')}
-          className='py-3.5 border-b border-gray-200 text-red-500 font-bold hover:bg-gray-50 active:bg-gray-100 transition-colors'
-        >
-          Delete
-        </button>
-        <button
-          onClick={() => handleAction('Edit')}
-          className='py-3.5 border-b border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-colors'
-        >
-          Edit
-        </button>
+        {/* Рендерим Delete и Edit ТОЛЬКО если пост принадлежит текущему юзеру */}
+        {isOwnPost && (
+          <>
+            <button
+              onClick={() => handleAction('Delete')}
+              className='py-3.5 border-b border-gray-200 text-red-500 font-bold hover:bg-gray-50 active:bg-gray-100 transition-colors'
+            >
+              Delete
+            </button>
+            <button
+              onClick={() => handleAction('Edit')}
+              className='py-3.5 border-b border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-colors'
+            >
+              Edit
+            </button>
+          </>
+        )}
+
         <button
           onClick={() => handleAction('Go to post')}
           className='py-3.5 border-b border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-colors'
