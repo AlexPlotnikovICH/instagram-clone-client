@@ -7,16 +7,14 @@ import useAuthStore from '../store/useAuthStore'
 export default function EditProfile() {
   const navigate = useNavigate()
 
-  // Достаем юзера и новую функцию обновления из стора
   const currentUser = useAuthStore(state => state.user)
   const updateUser = useAuthStore(state => state.updateUser)
 
-  // Инициализируем стейты реальными данными
+  // Инициализируем стейты РЕАЛЬНЫМИ данными, включая website
   const [fullname, setFullname] = useState(currentUser?.fullname || '')
   const [bio, setBio] = useState(currentUser?.bio || '')
-  const [website, setWebsite] = useState('') // Заглушка
+  const [website, setWebsite] = useState(currentUser?.website || '')
 
-  // Стейты для файла аватара
   const [selectedFile, setSelectedFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState(
     currentUser?.profile_image ||
@@ -29,7 +27,6 @@ export default function EditProfile() {
   const fileInputRef = useRef(null)
   const BIO_MAX_CHARS = 150
 
-  // Очистка памяти от временных ссылок
   useEffect(() => {
     return () => {
       if (previewUrl && previewUrl.startsWith('blob:')) {
@@ -38,7 +35,6 @@ export default function EditProfile() {
     }
   }, [previewUrl])
 
-  // Обработка выбора файла
   const handleFileSelect = e => {
     const file = e.target.files[0]
     if (file) {
@@ -48,7 +44,7 @@ export default function EditProfile() {
     }
   }
 
-  // БОЕВАЯ ФУНКЦИЯ СОХРАНЕНИЯ (Плавный React-путь)
+  // БОЕВАЯ ФУНКЦИЯ СОХРАНЕНИЯ
   const handleSave = async () => {
     try {
       setIsSubmitting(true)
@@ -57,18 +53,15 @@ export default function EditProfile() {
       const formData = new FormData()
       formData.append('fullname', fullname)
       formData.append('bio', bio)
+      formData.append('website', website) // <-- Теперь мы реально отправляем ссылку!
 
       if (selectedFile) {
         formData.append('profile_image', selectedFile)
       }
 
-      // 1. Стучимся на правильный URL
       const response = await api.put('/users/profile', formData)
 
-      // 2.  обновляем стейт в памяти
       updateUser(response.data)
-
-      // 3. уходим на страницу профиля
       navigate('/profile')
     } catch (err) {
       console.error('Update profile error:', err)
@@ -82,7 +75,7 @@ export default function EditProfile() {
   const inputClasses =
     'w-full border border-gray-300 rounded-lg p-3 text-[14px] focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all disabled:bg-gray-100'
 
-  if (!currentUser) return null // Защита от рендера без данных
+  if (!currentUser) return null
 
   return (
     <div className='flex flex-col w-full min-h-screen pt-10 pb-10 pl-25 bg-white text-black'>
@@ -147,11 +140,9 @@ export default function EditProfile() {
           </div>
 
           <div className='relative'>
+            {/* Убрали позорный текст */}
             <label htmlFor='website' className={labelClasses}>
-              Website{' '}
-              <span className='text-gray-400 font-normal text-sm'>
-                (Not supported yet)
-              </span>
+              Website
             </label>
             <div className='relative'>
               <LinkIcon

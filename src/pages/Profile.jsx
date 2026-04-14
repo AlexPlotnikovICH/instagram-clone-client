@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link as LinkIcon } from 'lucide-react'
 import {
   Link,
   useParams,
@@ -75,7 +76,7 @@ export default function Profile() {
         await api.post(`/users/follow/${profileUser._id}`)
       }
 
-      // Оптимистичное обновление локального состояния профиля
+      // обновление локального состояния профиля
       setProfileUser(prev => ({
         ...prev,
         isFollowing: !wasFollowing,
@@ -178,10 +179,28 @@ export default function Profile() {
               </span>
             </div>
 
-            <div className='text-[14px]'>
+            <div className='text-[14px] mt-2'>
               <p className='whitespace-pre-line leading-relaxed'>
                 {profileUser.bio || 'No bio yet...'}
               </p>
+
+              {/* Рендерим ссылку только если она есть */}
+              {profileUser.website && (
+                <a
+                  href={
+                    profileUser.website.startsWith('http')
+                      ? profileUser.website
+                      : `https://${profileUser.website}`
+                  }
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='block mt-2 font-bold text-[#00376b] hover:underline flex items-center gap-1'
+                >
+                  <LinkIcon size={14} className='rotate-45' />
+                  {/* Убираем http(s):// для красивого отображения */}
+                  {profileUser.website.replace(/^https?:\/\//, '')}
+                </a>
+              )}
             </div>
           </div>
         </header>
