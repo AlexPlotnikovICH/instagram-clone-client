@@ -4,18 +4,22 @@ import { Search, X } from 'lucide-react'
 import Sidebar from './Sidebar'
 import CreatePostModal from './CreatePostModal'
 import api from '../api'
+import useNotificationStore from '../store/useNotificationStore' // <-- ПОДКЛЮЧАЕМ СТОР
 
 export default function MainLayout() {
   const [activeDrawer, setActiveDrawer] = useState(null)
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false)
 
-  // Поиск
+  // Поиск (оставляем локальным, он тут на своем месте)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [isSearchLoading, setIsSearchLoading] = useState(false)
 
-  // Уведомления
-  const [notifications, setNotifications] = useState([])
+  // Уведомления тянем из глобального стора
+  const notifications = useNotificationStore(state => state.notifications)
+  const fetchNotifications = useNotificationStore(
+    state => state.fetchNotifications,
+  )
   const [isNotifLoading, setIsNotifLoading] = useState(false)
 
   const navigate = useNavigate()
@@ -47,23 +51,16 @@ export default function MainLayout() {
   }, [searchQuery])
 
   // --- ЛОГИКА УВЕДОМЛЕНИЙ ---
-  const fetchNotifications = async () => {
-    setIsNotifLoading(true)
-    try {
-      const response = await api.get('/notifications')
-      setNotifications(response.data)
-    } catch (error) {
-      console.error('Fetch notifications error:', error)
-    } finally {
-      setIsNotifLoading(false)
-    }
-  }
-
   useEffect(() => {
     if (activeDrawer === 'notifications') {
-      fetchNotifications()
+      const loadData = async () => {
+        setIsNotifLoading(true)
+        await fetchNotifications()
+        setIsNotifLoading(false)
+      }
+      loadData()
     }
-  }, [activeDrawer])
+  }, [activeDrawer, fetchNotifications])
 
   const handleUserClick = username => {
     setActiveDrawer(null)
@@ -202,6 +199,10 @@ export default function MainLayout() {
                         {notif.type === 'like' && 'liked your photo.'}
                         {notif.type === 'comment' && 'commented on your post.'}
                       </span>
+                      {/* Опционально: если хочешь, чтобы непрочитанные выделялись визуально */}
+                      {!notif.isRead && (
+                        <span className='inline-block w-2 h-2 bg-[#0095f6] rounded-full ml-2'></span>
+                      )}
                     </div>
                   </div>
                   {notif.post && (
