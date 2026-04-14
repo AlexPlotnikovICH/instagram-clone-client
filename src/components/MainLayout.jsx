@@ -4,22 +4,23 @@ import { Search, X } from 'lucide-react'
 import Sidebar from './Sidebar'
 import CreatePostModal from './CreatePostModal'
 import api from '../api'
-import useNotificationStore from '../store/useNotificationStore' // <-- ПОДКЛЮЧАЕМ СТОР
+import useNotificationStore from '../store/useNotificationStore'
 
 export default function MainLayout() {
   const [activeDrawer, setActiveDrawer] = useState(null)
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false)
 
-  // Поиск (оставляем локальным, он тут на своем месте)
+  // --- ЛОГИКА ПОИСКА ---
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [isSearchLoading, setIsSearchLoading] = useState(false)
 
-  // Уведомления тянем из глобального стора
+  // --- ЛОГИКА УВЕДОМЛЕНИЙ (Zustand + локальный лоадер) ---
   const notifications = useNotificationStore(state => state.notifications)
   const fetchNotifications = useNotificationStore(
     state => state.fetchNotifications,
   )
+  const markAsRead = useNotificationStore(state => state.markAsRead)
   const [isNotifLoading, setIsNotifLoading] = useState(false)
 
   const navigate = useNavigate()
@@ -28,7 +29,7 @@ export default function MainLayout() {
     setActiveDrawer(prev => (prev === drawerName ? null : drawerName))
   }
 
-  // --- ЛОГИКА ПОИСКА (DEBOUNCE) ---
+  // Effect: Поиск (Debounce)
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSearchResults([])
@@ -50,17 +51,20 @@ export default function MainLayout() {
     return () => clearTimeout(delayDebounceFn)
   }, [searchQuery])
 
-  // --- ЛОГИКА УВЕДОМЛЕНИЙ ---
+  // Effect: Загрузка уведомлений и сброс красной точки
   useEffect(() => {
     if (activeDrawer === 'notifications') {
       const loadData = async () => {
         setIsNotifLoading(true)
         await fetchNotifications()
         setIsNotifLoading(false)
+
+        // Гасим красную точку в сайдбаре только ПОСЛЕ загрузки данных.
+        markAsRead()
       }
       loadData()
     }
-  }, [activeDrawer, fetchNotifications])
+  }, [activeDrawer, fetchNotifications, markAsRead])
 
   const handleUserClick = username => {
     setActiveDrawer(null)
@@ -184,8 +188,9 @@ export default function MainLayout() {
                         notif.sender?.profile_image ||
                         `https://ui-avatars.com/api/?name=${notif.sender?.username}&background=random`
                       }
-                      className='w-11 h-11 rounded-full object-cover'
+                      className='w-11 h-11 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity'
                       alt='avatar'
+                      onClick={() => handleUserClick(notif.sender?.username)}
                     />
                     <div className='text-[14px] leading-tight'>
                       <span
@@ -199,7 +204,6 @@ export default function MainLayout() {
                         {notif.type === 'like' && 'liked your photo.'}
                         {notif.type === 'comment' && 'commented on your post.'}
                       </span>
-                      {/* Опционально: если хочешь, чтобы непрочитанные выделялись визуально */}
                       {!notif.isRead && (
                         <span className='inline-block w-2 h-2 bg-[#0095f6] rounded-full ml-2'></span>
                       )}

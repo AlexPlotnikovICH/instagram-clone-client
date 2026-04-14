@@ -29,7 +29,6 @@ export default function Sidebar({
   const fetchNotifications = useNotificationStore(
     state => state.fetchNotifications,
   )
-  const markAsRead = useNotificationStore(state => state.markAsRead)
   const hasUnread = useNotificationStore(state => state.hasUnread)
 
   // Запрашиваем статус уведомлений при загрузке сайдбара
@@ -53,7 +52,6 @@ export default function Sidebar({
       name: 'Notifications',
       action: () => {
         onToggleDrawer('notifications')
-        markAsRead() // <-- ГАСИМ ТОЧКУ ПРИ КЛИКЕ
       },
       icon: Heart,
     },
