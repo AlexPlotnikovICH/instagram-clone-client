@@ -16,9 +16,10 @@ export default function Post({ post }) {
   const [comments, setComments] = useState(post.comments || [])
   const [commentText, setCommentText] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
-
-  // Локальный стейт подписки для ленты (пока бэк не шлет статус в общем списке)
   const [isFollowed, setIsFollowed] = useState(false)
+
+  // Стейт для анимации лайка при двойном клике
+  const [showHeartAnimation, setShowHeartAnimation] = useState(false)
 
   const timeAgo = post.createdAt
     ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })
@@ -35,16 +36,12 @@ export default function Post({ post }) {
 
     try {
       await api.post(`/users/follow/${post.user._id}`)
-
-      // Если запрос прошел — мы молодцы
       setIsFollowed(true)
       if (updateFollowingCount) updateFollowingCount(true)
     } catch (error) {
-      // Обрабатываем 400 (уже подписан) как успех для интерфейса
       if (error.response?.status === 400) {
         setIsFollowed(true)
       } else {
-        // Все остальные ошибки (500, 404) — в лог, это реально косяки
         console.error(
           'Критическая ошибка подписки:',
           error.response?.data?.message || error.message,
@@ -72,6 +69,18 @@ export default function Post({ post }) {
       console.error('Like error:', error)
       setIsLiked(previousIsLiked)
       setLikeCount(previousLikeCount)
+    }
+  }
+
+  // --- ЛОГИКА ДВОЙНОГО КЛИКА (Только ставит лайк, не снимает) ---
+  const handleDoubleClick = () => {
+    // 1. Запускаем анимацию сердца в любом случае
+    setShowHeartAnimation(true)
+    setTimeout(() => setShowHeartAnimation(false), 1000)
+
+    // 2. Ставим лайк на бэкенде ТОЛЬКО если его еще нет
+    if (!isLiked) {
+      handleLike()
     }
   }
 
@@ -117,7 +126,7 @@ export default function Post({ post }) {
             </Link>
             <span className='text-gray-500'>• {timeAgo} •</span>
 
-            {/* КНОПКА FOLLOW: показываем только если это не мы и мы еще не нажали */}
+            {/* КНОПКА FOLLOW */}
             {currentUser?._id !== post.user?._id && !isFollowed && (
               <button
                 onClick={handleFollow}
@@ -133,13 +142,23 @@ export default function Post({ post }) {
         </button>
       </div>
 
-      {/* 2. КАРТИНКА */}
-      <div className='w-full h-[500px] bg-gray-100 rounded-sm overflow-hidden border border-gray-200'>
+      {/* 2. КАРТИНКА С ДАБЛ-КЛИКОМ */}
+      <div
+        className='relative w-full h-[500px] bg-gray-100 rounded-sm overflow-hidden border border-gray-200 cursor-pointer touch-manipulation flex items-center justify-center group'
+        onDoubleClick={handleDoubleClick}
+      >
         <img
           src={post.image}
           alt='post content'
-          className='h-full w-full object-cover'
+          className='h-full w-full object-cover select-none'
         />
+
+        {/* Анимация сердца поверх картинки */}
+        {showHeartAnimation && (
+          <div className='absolute z-10 animate-ping opacity-80'>
+            <Heart size={100} fill='white' className='text-white' />
+          </div>
+        )}
       </div>
 
       {/* 3. ПОДВАЛ */}
@@ -178,7 +197,7 @@ export default function Post({ post }) {
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className='text-[14px] text-gray-500 text-left mb-1 hover:text-gray-400'
+          className='text-[14px] text-gray-500 text-left mb-1 cursor-pointer hover:text-gray-700 transition-colors'
         >
           View all {comments.length} comments
         </button>
