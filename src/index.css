@@ -2,4 +2,7 @@
 
 @theme {
   --color-ichgram-blue: #0095f6;
+  --font-sans:
+    'Roboto', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Arial, sans-serif;
 }

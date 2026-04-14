@@ -28,13 +28,10 @@ const useNotificationStore = create((set, get) => ({
     if (!hasUnread) return
 
     try {
+      // Отправляем запрос в фоне
       await api.put('/notifications/read')
 
-      // гасим точку моментально, не дожидаясь ответа
-      set(state => ({
-        hasUnread: false,
-        notifications: state.notifications.map(n => ({ ...n, isRead: true })),
-      }))
+      set({ hasUnread: false })
     } catch (error) {
       console.error('Ошибка при сбросе статуса:', error)
     }
