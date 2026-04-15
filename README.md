@@ -1,16 +1,41 @@
-# React + Vite
+# ICHGRAM - Frontend (React / Vite)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+UI-часть клона социальной сети. Проект реализует современный интерфейс с использованием глобального стейт-менеджмента и адаптивной верстки.
 
-Currently, two official plugins are available:
+## 🚀 Быстрый старт
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Установка зависимостей
+   Убедитесь, что у вас установлен Node.js (рекомендуется v18+).
+   npm install
 
-## React Compiler
+2. Настройка окружения
+   В проекте настроен автоматический фолбэк на локальный бэкенд (http://localhost:3333/api), поэтому для базового запуска создавать .env не обязательно.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Однако для деплоя или кастомной настройки создайте файл .env в корне проекта и укажите:
+VITE_API_URL=http://localhost:3333/api
 
-## Expanding the ESLint configuration
+3. Запуск проекта
+   npm run dev
+   Проект будет доступен по адресу: http://localhost:5173
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+🛠 Технологический стек
+
+Сборщик: Vite (сверхбыстрый HMR)
+Ядро: React 18 (Hooks)
+Стилизация: Tailwind CSS v4 (переопределена типографика на глобальный Roboto)
+Роутинг: React Router DOM v6
+Стейт-менеджмент: Zustand (легковесная архитектура для глобальных уведомлений)
+Иконки: Lucide React
+API клиент: Axios с настроенными интерцепторами для автоматической передачи JWT токена.
+
+🏗 Архитектура и реализованные фичи
+Глобальная лента (Home): Рендер постов из БД, заглушки для лайков.
+
+Поиск (Search Drawer): Реализован с использованием паттерна Debounce (500ms), чтобы не спамить бэкенд запросами при каждом вводе символа.
+
+Уведомления (Zustand Store): Глобальный стейт. Индикатор непрочитанных сообщений (красная точка) гаснет при открытии шторки с оптимистичным обновлением UI.
+
+Direct Messages: Заглушены для MVP. В целях экономии ресурсов и подготовки к Serverless-деплою, реалтайм чаты на WebSockets заморожены (установлена UI-блокировка с объяснением причины).
+
+⚠️ Важное замечание для проверяющего
+Для корректной работы приложения сначала запустите бэкенд и выполните сидирование базы данных (npm run seed), как описано в README.md бэкенд-репозитория. Без этого интерфейс ленты будет пустым, так как база данных изначально чиста.
