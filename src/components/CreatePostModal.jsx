@@ -2,14 +2,14 @@ import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { X, UploadCloud, Smile, Loader2 } from 'lucide-react'
 import api from '../api'
-import useAuthStore from '../store/useAuthStore' // Достаем реального юзера
+import useAuthStore from '../store/useAuthStore'
 
 export default function CreatePostModal({ isOpen, onClose }) {
   const [selectedFile, setSelectedFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState(null)
   const [caption, setCaption] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false) // Стейт для лоадера
-  const [error, setError] = useState('') // Стейт для ошибок
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
 
   const fileInputRef = useRef(null)
 

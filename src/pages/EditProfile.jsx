@@ -53,7 +53,7 @@ export default function EditProfile() {
       const formData = new FormData()
       formData.append('fullname', fullname)
       formData.append('bio', bio)
-      formData.append('website', website) // <-- Теперь мы реально отправляем ссылку!
+      formData.append('website', website)
 
       if (selectedFile) {
         formData.append('profile_image', selectedFile)
@@ -140,7 +140,6 @@ export default function EditProfile() {
           </div>
 
           <div className='relative'>
-            {/* Убрали позорный текст */}
             <label htmlFor='website' className={labelClasses}>
               Website
             </label>

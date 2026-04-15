@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import Footer from '../components/Footer'
-import PostModal from '../components/PostModal' // 1. Подключили модалку
+import PostModal from '../components/PostModal'
 import api from '../api'
 
 export default function Explore() {

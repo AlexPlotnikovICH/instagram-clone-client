@@ -2,8 +2,6 @@ import Footer from '../components/Footer'
 
 export default function NotFound() {
   return (
-    // pl-25 - держим наш стандарт отступа.
-    // min-h-screen и flex-col нужны, чтобы прижать футер к низу, если контента мало
     <div className='flex flex-col w-full min-h-screen pt-10 pb-10 pl-25 bg-white'>
       {/* Основной блок с контентом по центру */}
       <div className='flex-1 flex items-center justify-center w-full max-w-[935px] pr-4'>

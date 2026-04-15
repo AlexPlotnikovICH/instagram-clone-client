@@ -36,7 +36,7 @@ export default function Profile() {
         setLoading(true)
         let targetUser = null
 
-        // 1. ПОЛУЧАЕМ ДАННЫЕ (Теперь всегда через API!)
+        // 1. ПОЛУЧАЕМ ДАННЫЕ
         const usernameToFetch = isOwnProfile
           ? currentUser?.username
           : urlUsername

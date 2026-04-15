@@ -76,19 +76,17 @@ const useAuthStore = create(set => ({
     localStorage.setItem('user', JSON.stringify(newUserData))
     set({ user: newUserData })
   },
-  // Функция для изменения счетчика подписок текущего юзера
+  // Функция счетчика подписок текущего юзера
   updateFollowingCount: isFollowing => {
     set(state => {
       if (!state.user) return state
 
       const updatedUser = {
         ...state.user,
-        // Если подписались — +1, если отписались — -1
         followingCount:
           (state.user.followingCount || 0) + (isFollowing ? 1 : -1),
       }
 
-      // Не забываем обновить локальное хранилище, иначе при F5 всё сбросится
       localStorage.setItem('user', JSON.stringify(updatedUser))
 
       return { user: updatedUser }
