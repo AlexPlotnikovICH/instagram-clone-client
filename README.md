@@ -1,41 +1,50 @@
 # ICHGRAM - Frontend (React / Vite)
+UI part of the social network clone. The project features a modern interface utilizing global state management and responsive design.
 
-UI-часть клона социальной сети. Проект реализует современный интерфейс с использованием глобального стейт-менеджмента и адаптивной верстки.
+🌍 Read this in: [Deutsch](README.de.md) | [Русский](README.ru.md)
 
-## 🚀 Быстрый старт
+## 🚀 Quick Start
 
-1. Установка зависимостей
-   Убедитесь, что у вас установлен Node.js (рекомендуется v18+).
-   npm install
+1. Installing Dependencies
+Make sure you have Node.js installed (v18+ recommended).
 
-2. Настройка окружения
-   В проекте настроен автоматический фолбэк на локальный бэкенд (http://localhost:3333/api), поэтому для базового запуска создавать .env не обязательно.
+npm install
 
-Однако для деплоя или кастомной настройки создайте файл .env в корне проекта и укажите:
+2. Environment Configuration
+The project is pre-configured with an automatic fallback to the local backend (http://localhost:3333/api), so creating a .env file is optional for a basic local run.
+
+However, for production deployment or custom configuration, create a .env file in the project root and specify:
+
 VITE_API_URL=http://localhost:3333/api
 
-3. Запуск проекта
-   npm run dev
-   Проект будет доступен по адресу: http://localhost:5173
+3. Running the Project
+npm run dev
 
-🛠 Технологический стек
+The project will be available at: http://localhost:5173
 
-Сборщик: Vite (сверхбыстрый HMR)
-Ядро: React 18 (Hooks)
-Стилизация: Tailwind CSS v4 (переопределена типографика на глобальный Roboto)
-Роутинг: React Router DOM v6
-Стейт-менеджмент: Zustand (легковесная архитектура для глобальных уведомлений)
-Иконки: Lucide React
-API клиент: Axios с настроенными интерцепторами для автоматической передачи JWT токена.
+🛠 Tech Stack
+Bundler: Vite (blazing fast HMR)
 
-🏗 Архитектура и реализованные фичи
-Глобальная лента (Home): Рендер постов из БД, заглушки для лайков.
+Core: React 18 (Hooks)
 
-Поиск (Search Drawer): Реализован с использованием паттерна Debounce (500ms), чтобы не спамить бэкенд запросами при каждом вводе символа.
+Styling: Tailwind CSS v4 (with typography overridden to global Roboto)
 
-Уведомления (Zustand Store): Глобальный стейт. Индикатор непрочитанных сообщений (красная точка) гаснет при открытии шторки с оптимистичным обновлением UI.
+Routing: React Router DOM v6
 
-Direct Messages: Заглушены для MVP. В целях экономии ресурсов и подготовки к Serverless-деплою, реалтайм чаты на WebSockets заморожены (установлена UI-блокировка с объяснением причины).
+State Management: Zustand (lightweight architecture for global notifications)
 
-⚠️ Важное замечание для проверяющего
-Для корректной работы приложения сначала запустите бэкенд и выполните сидирование базы данных (npm run seed), как описано в README.md бэкенд-репозитория. Без этого интерфейс ленты будет пустым, так как база данных изначально чиста.
+Icons: Lucide React
+
+API Client: Axios with configured interceptors for automatic JWT token transmission.
+
+🏗 Architecture & Implemented Features
+Global Feed (Home): Rendering posts from the database with placeholders for likes.
+
+Search Drawer: Implemented using the Debounce pattern (500ms) to avoid spamming the backend with requests on every keystroke.
+
+Notifications (Zustand Store): Global state management. The unread messages indicator (red dot) turns off when opening the drawer, using optimistic UI updates.
+
+Direct Messages: Mocked for MVP. To save resources and prepare for Serverless deployment, real-time WebSocket chats have been frozen (a UI block with an explanation is implemented).
+
+⚠️ Important Note for Reviewers
+For the application to work correctly, start the backend first and run the database seeding script (node seed.js), as described in the backend repository's README.md. Without this, the feed interface will be empty since the database is initially blank.
