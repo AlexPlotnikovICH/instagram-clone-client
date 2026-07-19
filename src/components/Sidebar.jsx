@@ -9,10 +9,11 @@ import {
   PlusSquare,
   User,
   LogOut,
+  Sparkles,
 } from 'lucide-react'
 import logo from '../assets/icons/ICHGRAMlogo.svg'
 import useAuthStore from '../store/useAuthStore'
-import useNotificationStore from '../store/useNotificationStore' // <-- ИМПОРТ НОВОГО СТОРА
+import useNotificationStore from '../store/useNotificationStore'
 
 export default function Sidebar({
   onToggleDrawer,
@@ -25,13 +26,11 @@ export default function Sidebar({
   const user = useAuthStore(state => state.user)
   const logout = useAuthStore(state => state.logout)
 
-  // Достаем методы и стейт из стора уведомлений
   const fetchNotifications = useNotificationStore(
     state => state.fetchNotifications,
   )
   const hasUnread = useNotificationStore(state => state.hasUnread)
 
-  // Запрашиваем статус уведомлений при загрузке сайдбара
   useEffect(() => {
     if (user) {
       fetchNotifications()
@@ -48,6 +47,7 @@ export default function Sidebar({
     { name: 'Search', action: () => onToggleDrawer('search'), icon: Search },
     { name: 'Explore', path: '/explore', icon: Compass },
     { name: 'Messages', path: '/messages', icon: MessageCircle },
+    { name: 'AI Assistant', path: '/ai-assistant', icon: Sparkles },
     {
       name: 'Notifications',
       action: () => {

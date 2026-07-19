@@ -10,6 +10,7 @@ import Profile from './pages/Profile'
 import EditProfile from './pages/EditProfile'
 import ResetPassword from './pages/ResetPassword'
 import NotFound from './pages/NotFound'
+import AIAssistant from './pages/AIAssistant'
 
 function App() {
   return (
@@ -30,12 +31,11 @@ function App() {
           <Route index element={<Feed />} />
           <Route path='explore' element={<Explore />} />
           <Route path='messages' element={<Messages />} />
+          <Route path='ai-assistant' element={<AIAssistant />} />
 
-          {/* Наш собственный профиль */}
           <Route path='profile' element={<Profile />} />
           <Route path='profile/edit' element={<EditProfile />} />
 
-          {/* Исправленный динамический роут для чужих профилей */}
           <Route path='profile/:username' element={<Profile />} />
 
           <Route path='*' element={<NotFound />} />
