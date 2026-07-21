@@ -7,7 +7,7 @@ export default function Explore() {
   const [explorePosts, setExplorePosts] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
-  // 2. Добавили стейт для открытия поста
+  // 2. Added state for opening a post
   const [selectedPost, setSelectedPost] = useState(null)
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export default function Explore() {
               return (
                 <div
                   key={post._id}
-                  onClick={() => setSelectedPost(post)} // 3. Повесили клик!
+                  onClick={() => setSelectedPost(post)} // 3. Added click handler
                   className={`relative group cursor-pointer bg-gray-100 ${isLarge ? 'row-span-2' : ''}`}
                 >
                   <img
@@ -70,7 +70,7 @@ export default function Explore() {
         </div>
       </div>
 
-      {/* 4. Рендерим модальное окно, если выбран пост */}
+      {/* 4. Render the modal window if a post is selected */}
       {selectedPost && (
         <PostModal post={selectedPost} onClose={() => setSelectedPost(null)} />
       )}

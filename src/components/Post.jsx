@@ -10,7 +10,7 @@ export default function Post({ post }) {
   const currentUser = useAuthStore(state => state.user)
   const updateFollowingCount = useAuthStore(state => state.updateFollowingCount)
 
-  // --- СТЕЙТЫ ---
+  // --- STATE ---
   const [isLiked, setIsLiked] = useState(post.likes?.includes(currentUser?._id))
   const [likeCount, setLikeCount] = useState(post.likes?.length || 0)
   const [comments, setComments] = useState(post.comments || [])
@@ -18,7 +18,7 @@ export default function Post({ post }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isFollowed, setIsFollowed] = useState(false)
 
-  // Стейт для анимации лайка при двойном клике
+  // State for the like animation on double-click
   const [showHeartAnimation, setShowHeartAnimation] = useState(false)
 
   const timeAgo = post.createdAt
@@ -30,7 +30,7 @@ export default function Post({ post }) {
       ? '/profile'
       : `/profile/${post.user?.username}`
 
-  // --- ЛОГИКА ПОДПИСКИ ---
+  // --- FOLLOW LOGIC ---
   const handleFollow = async () => {
     if (!post.user?._id) return
 
@@ -43,14 +43,14 @@ export default function Post({ post }) {
         setIsFollowed(true)
       } else {
         console.error(
-          'Критическая ошибка подписки:',
+          'Critical follow error:',
           error.response?.data?.message || error.message,
         )
       }
     }
   }
 
-  // --- ЛОГИКА ЛАЙКА ---
+  // --- LIKE LOGIC ---
   const handleLike = async () => {
     const previousIsLiked = isLiked
     const previousLikeCount = likeCount
@@ -72,19 +72,19 @@ export default function Post({ post }) {
     }
   }
 
-  // --- ЛОГИКА ДВОЙНОГО КЛИКА (Только ставит лайк, не снимает) ---
+  // --- DOUBLE-CLICK LOGIC (Only likes, does not unlike) ---
   const handleDoubleClick = () => {
-    // 1. Запускаем анимацию сердца в любом случае
+    // 1. Trigger the heart animation regardless
     setShowHeartAnimation(true)
     setTimeout(() => setShowHeartAnimation(false), 1000)
 
-    // 2. Ставим лайк на бэкенде ТОЛЬКО если его еще нет
+    // 2. Like the post on the backend ONLY if it's not already liked
     if (!isLiked) {
       handleLike()
     }
   }
 
-  // --- ЛОГИКА КОММЕНТАРИЯ ---
+  // --- COMMENT LOGIC ---
   const handleAddComment = async e => {
     e.preventDefault()
     if (!commentText.trim()) return
@@ -102,7 +102,7 @@ export default function Post({ post }) {
 
   return (
     <div className='flex w-[404px] flex-col border-b border-gray-200 pb-3'>
-      {/* 1. ШАПКА */}
+      {/* 1. HEADER */}
       <div className='flex items-center justify-between py-3 px-1'>
         <div className='flex items-center gap-3'>
           <Link to={profileUrl}>
@@ -126,7 +126,7 @@ export default function Post({ post }) {
             </Link>
             <span className='text-gray-500'>• {timeAgo} •</span>
 
-            {/* КНОПКА FOLLOW */}
+            {/* FOLLOW BUTTON */}
             {currentUser?._id !== post.user?._id && !isFollowed && (
               <button
                 onClick={handleFollow}
@@ -142,7 +142,7 @@ export default function Post({ post }) {
         </button>
       </div>
 
-      {/* 2. КАРТИНКА С ДАБЛ-КЛИКОМ */}
+      {/* 2. IMAGE WITH DOUBLE-CLICK */}
       <div
         className='relative w-full h-[500px] bg-gray-100 rounded-sm overflow-hidden border border-gray-200 cursor-pointer touch-manipulation flex items-center justify-center group'
         onDoubleClick={handleDoubleClick}
@@ -153,7 +153,7 @@ export default function Post({ post }) {
           className='h-full w-full object-cover select-none'
         />
 
-        {/* Анимация сердца поверх картинки */}
+        {/* Heart animation overlay */}
         {showHeartAnimation && (
           <div className='absolute z-10 animate-ping opacity-80'>
             <Heart size={100} fill='white' className='text-white' />
@@ -161,7 +161,7 @@ export default function Post({ post }) {
         )}
       </div>
 
-      {/* 3. ПОДВАЛ */}
+      {/* 3. FOOTER */}
       <div className='flex flex-col pt-3 px-1'>
         <div className='flex items-center gap-4 mb-2'>
           <button

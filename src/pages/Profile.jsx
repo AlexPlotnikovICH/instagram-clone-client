@@ -15,16 +15,12 @@ export default function Profile() {
   const { onOpenCreate, onToggleDrawer } = useOutletContext()
   const { username: urlUsername } = useParams()
   const location = useLocation()
-
-  // Получаем текущего пользователя и функцию обновления счетчика из стора
   const currentUser = useAuthStore(state => state.user)
   const updateFollowingCount = useAuthStore(state => state.updateFollowingCount)
 
-  // Определяем, является ли профиль личным
   const isOwnProfile =
     location.pathname === '/profile' || urlUsername === currentUser?.username
 
-  // Состояния компонента
   const [profileUser, setProfileUser] = useState(null)
   const [userPosts, setUserPosts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -35,8 +31,7 @@ export default function Profile() {
       try {
         setLoading(true)
         let targetUser = null
-
-        // 1. ПОЛУЧАЕМ ДАННЫЕ
+        // 1. FETCH USER DATA
         const usernameToFetch = isOwnProfile
           ? currentUser?.username
           : urlUsername
@@ -48,7 +43,7 @@ export default function Profile() {
 
         setProfileUser(targetUser)
 
-        // 2. ПОЛУЧАЕМ ПОСТЫ
+        // 2. FETCH USER POSTS
         if (targetUser?._id) {
           const postsRes = await api.get(`/posts/user/${targetUser._id}`)
           setUserPosts(postsRes.data)
@@ -63,7 +58,6 @@ export default function Profile() {
     fetchProfileData()
   }, [urlUsername, isOwnProfile, currentUser])
 
-  // Функция переключения подписки
   const handleFollowToggle = async () => {
     if (!profileUser || isOwnProfile) return
 
@@ -76,7 +70,7 @@ export default function Profile() {
         await api.post(`/users/follow/${profileUser._id}`)
       }
 
-      // обновление локального состояния профиля
+      // Update local profile state
       setProfileUser(prev => ({
         ...prev,
         isFollowing: !wasFollowing,
@@ -85,7 +79,7 @@ export default function Profile() {
           : prev.followersCount + 1,
       }))
 
-      // Синхронизация глобального счетчика подписок в useAuthStore
+      // Sync the global following count in useAuthStore
       if (updateFollowingCount) {
         updateFollowingCount(!wasFollowing)
       }
@@ -94,7 +88,7 @@ export default function Profile() {
     }
   }
 
-  // Рендеринг состояний загрузки или ошибки
+  // Render loading or error states
   if (loading && !profileUser) {
     return (
       <div className='pl-25 pt-10 font-semibold text-gray-500'>
@@ -184,7 +178,7 @@ export default function Profile() {
                 {profileUser.bio || 'No bio yet...'}
               </p>
 
-              {/* Рендерим ссылку только если она есть */}
+              {/* Render the link only if it exists */}
               {profileUser.website && (
                 <a
                   href={
@@ -197,7 +191,7 @@ export default function Profile() {
                   className='block mt-2 font-bold text-[#00376b] hover:underline flex items-center gap-1'
                 >
                   <LinkIcon size={14} className='rotate-45' />
-                  {/* Убираем http(s):// для красивого отображения */}
+                  {/* Remove http(s):// for cleaner display */}
                   {profileUser.website.replace(/^https?:\/\//, '')}
                 </a>
               )}

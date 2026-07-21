@@ -37,7 +37,7 @@ export default function CreatePostModal({ isOpen, onClose }) {
     if (file) {
       setSelectedFile(file)
       setPreviewUrl(URL.createObjectURL(file))
-      setError('') // Сбрасываем ошибку при новом выборе
+      setError('')
     }
   }
 
@@ -49,7 +49,6 @@ export default function CreatePostModal({ isOpen, onClose }) {
     onClose()
   }
 
-  // БОЕВОЙ ОБРАБОТЧИК ОТПРАВКИ
   const handleShare = async () => {
     if (!selectedFile) return
 
@@ -57,22 +56,19 @@ export default function CreatePostModal({ isOpen, onClose }) {
       setIsSubmitting(true)
       setError('')
 
-      // 1. Создаем объект FormData
       const formData = new FormData()
 
-      // 2. Упаковываем данные строго по контракту
       formData.append('image', selectedFile)
       if (caption.trim()) {
         formData.append('caption', caption)
       }
 
-      // 3. Отправляем на бэкенд
       await api.post('/posts', formData)
 
       handleClose()
       window.location.reload()
     } catch (err) {
-      console.error('Ошибка создания поста:', err)
+      console.error('Error creating post:', err)
       setError(
         err.response?.data?.message || 'Failed to create post. Try again.',
       )
@@ -124,7 +120,6 @@ export default function CreatePostModal({ isOpen, onClose }) {
           </div>
         </div>
 
-        {/* Вывод ошибки, если сервер ругнулся */}
         {error && (
           <div className='w-full bg-red-100 text-red-600 text-center py-2 text-sm font-semibold'>
             {error}

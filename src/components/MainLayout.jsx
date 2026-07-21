@@ -10,12 +10,12 @@ export default function MainLayout() {
   const [activeDrawer, setActiveDrawer] = useState(null)
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false)
 
-  // --- ЛОГИКА ПОИСКА ---
+  // --- SEARCH LOGIC ---
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [isSearchLoading, setIsSearchLoading] = useState(false)
 
-  // --- ЛОГИКА УВЕДОМЛЕНИЙ (Zustand + локальный лоадер) ---
+  // --- NOTIFICATION LOGIC (Zustand + local loader) ---
   const notifications = useNotificationStore(state => state.notifications)
   const fetchNotifications = useNotificationStore(
     state => state.fetchNotifications,
@@ -29,7 +29,7 @@ export default function MainLayout() {
     setActiveDrawer(prev => (prev === drawerName ? null : drawerName))
   }
 
-  // Effect: Поиск (Debounce)
+  // Effect: Search (Debounce)
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSearchResults([])
@@ -51,7 +51,7 @@ export default function MainLayout() {
     return () => clearTimeout(delayDebounceFn)
   }, [searchQuery])
 
-  // Effect: Загрузка уведомлений и сброс красной точки
+  // Effect: Load notifications and reset the red dot
   useEffect(() => {
     if (activeDrawer === 'notifications') {
       const loadData = async () => {
@@ -59,7 +59,7 @@ export default function MainLayout() {
         await fetchNotifications()
         setIsNotifLoading(false)
 
-        // Гасим красную точку в сайдбаре только ПОСЛЕ загрузки данных.
+        // Turn off the red dot in the sidebar only AFTER the data has loaded.
         markAsRead()
       }
       loadData()
@@ -91,7 +91,7 @@ export default function MainLayout() {
         />
       </main>
 
-      {/* ОВЕРЛЕЙ */}
+      {/* OVERLAY */}
       {activeDrawer !== null && (
         <div
           className='fixed inset-0 bg-black/40 z-30 transition-opacity cursor-pointer'
@@ -99,7 +99,7 @@ export default function MainLayout() {
         ></div>
       )}
 
-      {/* ШТОРКА ПОИСКА */}
+      {/* SEARCH DRAWER */}
       <div
         className={`fixed top-0 left-[250px] h-screen w-[400px] bg-white z-40 shadow-xl border-r border-gray-200 transition-transform duration-300 ease-in-out flex flex-col ${activeDrawer === 'search' ? 'translate-x-0' : '-translate-x-full'}`}
       >
@@ -167,7 +167,7 @@ export default function MainLayout() {
         </div>
       </div>
 
-      {/* ШТОРКА УВЕДОМЛЕНИЙ */}
+      {/* NOTIFICATIONS DRAWER */}
       <div
         className={`fixed top-0 left-[250px] h-screen w-[400px] bg-white z-40 shadow-xl border-r border-gray-200 transition-transform duration-300 ease-in-out flex flex-col ${activeDrawer === 'notifications' ? 'translate-x-0' : '-translate-x-full'}`}
       >

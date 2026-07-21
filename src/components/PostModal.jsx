@@ -10,7 +10,7 @@ export default function PostModal({ post, onClose }) {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false)
   const currentUser = useAuthStore(state => state.user)
 
-  // 1. Инициализируем локальный стейт
+  // 1. Initialize local state
   const [isLiked, setIsLiked] = useState(post.likes?.includes(currentUser?._id))
   const [likeCount, setLikeCount] = useState(post.likes?.length || 0)
   const [comments, setComments] = useState(post.comments || [])
@@ -25,14 +25,14 @@ export default function PostModal({ post, onClose }) {
 
   if (!post) return null
 
-  // Логика ссылок и аватарок
+  // Logic for links and avatars
   const isOwnPost = post.user?._id === currentUser?._id
   const profileUrl = isOwnPost ? '/profile' : `/profile/${post.user?.username}`
   const authorAvatar =
     post.user?.profile_image ||
     `https://ui-avatars.com/api/?name=${post.user?.username || 'U'}&background=random`
 
-  // --- ФУНКЦИЯ ЛАЙКА ---
+  // --- LIKE FUNCTION ---
   const handleLike = async () => {
     const previousIsLiked = isLiked
     const previousLikeCount = likeCount
@@ -44,29 +44,29 @@ export default function PostModal({ post, onClose }) {
 
     try {
       const response = await api.put(`/posts/${post._id}/like`)
-      // Синхронизируем с реальностью от сервера
+      // Sync with the actual data from the server
       setLikeCount(response.data.length)
       setIsLiked(response.data.includes(currentUser?._id))
     } catch (error) {
       console.error('Like error:', error)
-      // Откат при ошибке
+      // Rollback on error
       setIsLiked(previousIsLiked)
       setLikeCount(previousLikeCount)
     }
   }
-  // --- ФУНКЦИЯ УДАЛЕНИЯ ПОСТА ---
+  // --- DELETE POST FUNCTION ---
   const handleDeletePost = async id => {
     try {
       await api.delete(`/posts/${id}`)
-      alert('Пост успешно удален!')
-      // костыль: чтобы пост исчез из ленты, просто перезагружаем страницу.
+      alert('Post successfully deleted!')
+      // Workaround: to make the post disappear from the feed, just reload the page.
       window.location.reload()
     } catch (error) {
       console.error('Delete post error:', error)
-      alert(error.response?.data?.message || 'Ошибка при удалении поста')
+      alert(error.response?.data?.message || 'Error deleting post')
     }
   }
-  // --- ФУНКЦИЯ ДОБАВЛЕНИЯ КОММЕНТАРИЯ ---
+  // --- ADD COMMENT FUNCTION ---
   const handleAddComment = async e => {
     e.preventDefault()
     if (!commentText.trim()) return
@@ -82,19 +82,19 @@ export default function PostModal({ post, onClose }) {
     }
   }
 
-  // --- ФУНКЦИЯ УДАЛЕНИЯ КОММЕНТАРИЯ ---
+  // --- DELETE COMMENT FUNCTION ---
   const handleDeleteComment = async commentId => {
-    if (!window.confirm('Удалить комментарий?')) return
+    if (!window.confirm('Delete this comment?')) return
 
     try {
       const response = await api.delete(
         `/posts/${post._id}/comment/${commentId}`,
       )
-      // Бэкенд возвращает обновленный массив
+      // Backend returns the updated array
       setComments(response.data)
     } catch (error) {
       console.error('Delete comment error:', error)
-      alert(error.response?.data?.message || 'Ошибка при удалении комментария')
+      alert(error.response?.data?.message || 'Error deleting comment')
     }
   }
 
@@ -114,7 +114,7 @@ export default function PostModal({ post, onClose }) {
         className='bg-white flex flex-col md:flex-row w-full max-w-[1200px] h-full max-h-[90vh] rounded-md overflow-hidden relative'
         onClick={e => e.stopPropagation()}
       >
-        {/* ЛЕВАЯ ЧАСТЬ: Изображение */}
+        {/* LEFT SIDE: Image */}
         <div className='w-full md:w-[60%] bg-black flex items-center justify-center min-h-[50vh] md:min-h-0'>
           <img
             src={post.image}
@@ -123,9 +123,9 @@ export default function PostModal({ post, onClose }) {
           />
         </div>
 
-        {/* ПРАВАЯ ЧАСТЬ: Контент */}
+        {/* RIGHT SIDE: Content */}
         <div className='w-full md:w-[40%] flex flex-col bg-white h-full max-h-[90vh]'>
-          {/* ШАПКА */}
+          {/* HEADER */}
           <div className='flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0'>
             <Link
               to={profileUrl}
@@ -147,7 +147,7 @@ export default function PostModal({ post, onClose }) {
             />
           </div>
 
-          {/* КОММЕНТАРИИ И ОПИСАНИЕ */}
+          {/* COMMENTS AND CAPTION */}
           <div className='flex-1 overflow-y-auto p-4 space-y-5'>
             {post.caption && (
               <div className='flex gap-3'>
@@ -163,9 +163,9 @@ export default function PostModal({ post, onClose }) {
               </div>
             )}
 
-            {/* СПИСОК КОММЕНТОВ */}
+            {/* COMMENTS LIST */}
             {comments.map(comment => {
-              // проверка прав на удаление
+              // check delete permissions
               const canDelete =
                 comment.user?._id === currentUser?._id ||
                 post.user?._id === currentUser?._id
@@ -192,12 +192,12 @@ export default function PostModal({ post, onClose }) {
                     </div>
                   </div>
 
-                  {/* Кнопка удаления */}
+                  {/* Delete button */}
                   {canDelete && (
                     <button
                       onClick={() => handleDeleteComment(comment._id)}
                       className='text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1'
-                      title='Удалить комментарий'
+                      title='Delete comment'
                     >
                       <X size={14} />
                     </button>
@@ -207,7 +207,7 @@ export default function PostModal({ post, onClose }) {
             })}
           </div>
 
-          {/* ПОДВАЛ (ЛАЙКИ) */}
+          {/* FOOTER (LIKES) */}
           <div className='border-t border-gray-200 flex-shrink-0'>
             <div className='p-4'>
               <div className='flex gap-4 mb-2'>
@@ -225,7 +225,7 @@ export default function PostModal({ post, onClose }) {
               <div className='font-bold text-[14px]'>{likeCount} likes</div>
             </div>
 
-            {/* ИНПУТ КОММЕНТАРИЯ */}
+            {/* COMMENT INPUT */}
             <form
               onSubmit={handleAddComment}
               className='flex items-center gap-3 px-4 py-3 border-t border-gray-200'

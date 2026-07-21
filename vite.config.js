@@ -5,17 +5,17 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  // Настройки локального сервера для разработки
+  // Local development server settings
   server: {
-    // Жестко фиксируем порт
+    // Hardcode the port
     port: 5173,
-    // Настраиваем прокси для обхода CORS
+    // Configure a proxy to bypass CORS
     proxy: {
-      // Перехватываем все запросы, начинающиеся с /api
+      // Intercept all requests starting with /api
       '/api': {
-        // Перенаправляем их на твой бэкенд
+        // Redirect them to your backend
         target: 'http://localhost:3333',
-        // Подменяем заголовок origin, чтобы сервер думал, что запрос пришел от него самого
+        // Change the origin header so the server thinks the request is coming from itself
         changeOrigin: true,
       },
     },

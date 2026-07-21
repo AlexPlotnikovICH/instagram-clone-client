@@ -28,7 +28,6 @@ const useAuthStore = create(set => ({
         throw new Error('Сервер не вернул токен')
       }
 
-      // Теперь userData — это объект {_id, fullname, username, email}
       localStorage.setItem('token', token)
       localStorage.setItem('user', JSON.stringify(userData))
 
@@ -51,11 +50,7 @@ const useAuthStore = create(set => ({
         password: userData.password,
       }
 
-      // Отправляем запрос
       await api.post('/auth/register', payload)
-
-      // Бэкенд токен не дает, поэтому мы просто возвращаем success
-      // и пусть Register.jsx перекинет юзера на страницу логина
       return { success: true }
     } catch (error) {
       const errorMessage =
@@ -65,18 +60,15 @@ const useAuthStore = create(set => ({
     }
   },
 
-  // Функция для кнопки выхода
   logout: () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     set({ user: null, token: null, isAuthenticated: false })
   },
-  // Функция для обновления данных юзера в стейте (после редактирования профиля)
   updateUser: newUserData => {
     localStorage.setItem('user', JSON.stringify(newUserData))
     set({ user: newUserData })
   },
-  // Функция счетчика подписок текущего юзера
   updateFollowingCount: isFollowing => {
     set(state => {
       if (!state.user) return state

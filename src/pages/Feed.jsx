@@ -16,7 +16,7 @@ export default function Feed() {
     const fetchPosts = async () => {
       try {
         setLoading(true)
-        // Наш api.js сам подставит Bearer token в заголовки
+        // Our api.js will automatically add the Bearer token to headers
         const response = await api.get('/posts')
         setPosts(response.data)
       } catch (err) {
@@ -50,7 +50,7 @@ export default function Feed() {
     <div className='flex flex-col min-h-screen w-full items-start pl-24 bg-transparent pt-10'>
       <div className='flex flex-col w-full max-w-[847px]'>
         <div className='grid grid-cols-1 xl:grid-cols-2 gap-[39px] pb-10'>
-          {/* Используем _id из MongoDB в качестве key */}
+          {/* Use _id from MongoDB as the key */}
           {posts.map(post => (
             <Post key={post._id} post={post} />
           ))}

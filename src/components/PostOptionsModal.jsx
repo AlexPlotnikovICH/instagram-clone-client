@@ -9,14 +9,14 @@ export default function PostOptionsModal({
 
   const handleAction = actionName => {
     if (actionName === 'Copy link') {
-      // Формируем прямую ссылку на пост, даже если самого роута на фронте пока нет
+      // Create a direct link to the post, even if the route doesn't exist on the frontend yet
       const postUrl = `${window.location.origin}/p/${postId}`
       navigator.clipboard.writeText(postUrl)
-      alert(`Ссылка скопирована:\n${postUrl}`)
+      alert(`Link copied:\n${postUrl}`)
     } else if (actionName === 'Edit' || actionName === 'Go to post') {
-      alert('Функция в разработке 🛠')
+      alert('Feature in development 🛠')
     } else if (actionName === 'Delete') {
-      if (window.confirm('Точно удалить этот пост? Действие необратимо.')) {
+      if (window.confirm('Are you sure you want to delete this post? This action is irreversible.')) {
         onDeletePost(postId)
       }
     }
@@ -33,7 +33,7 @@ export default function PostOptionsModal({
         className='bg-white w-[400px] rounded-xl flex flex-col overflow-hidden text-[14px]'
         onClick={e => e.stopPropagation()}
       >
-        {/* Рендерим Delete и Edit ТОЛЬКО если пост принадлежит текущему юзеру */}
+        {/* Render Delete and Edit ONLY if the post belongs to the current user */}
         {isOwnPost && (
           <>
             <button

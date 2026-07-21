@@ -9,7 +9,7 @@ export default function ResetPassword() {
   const handleSubmit = e => {
     e.preventDefault()
 
-    // ИМИТАЦИЯ ОТПРАВКИ
+    // SIMULATE SUBMISSION
     if (!loginString.trim()) return
 
     alert(

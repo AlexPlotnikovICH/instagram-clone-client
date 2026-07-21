@@ -21,7 +21,7 @@ export default function Register() {
 
     setErrors({})
 
-    // Валидация на фронте
+    // Frontend validation
     if (password.length < 6) {
       setErrors({ general: 'Password must be at least 6 characters.' })
       return
@@ -35,7 +35,7 @@ export default function Register() {
       navigate('/login')
     } else {
       setIsSubmitting(false)
-      // Если бэк вернул ошибку уникальности
+      // Handle uniqueness error from the backend
       if (
         response.error.toLowerCase().includes('exist') ||
         response.error.toLowerCase().includes('существует')

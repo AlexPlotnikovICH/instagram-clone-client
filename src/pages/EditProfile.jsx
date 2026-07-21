@@ -10,7 +10,7 @@ export default function EditProfile() {
   const currentUser = useAuthStore(state => state.user)
   const updateUser = useAuthStore(state => state.updateUser)
 
-  // Инициализируем стейты РЕАЛЬНЫМИ данными, включая website
+  // Initialize states with REAL data, including website
   const [fullname, setFullname] = useState(currentUser?.fullname || '')
   const [bio, setBio] = useState(currentUser?.bio || '')
   const [website, setWebsite] = useState(currentUser?.website || '')
@@ -44,7 +44,7 @@ export default function EditProfile() {
     }
   }
 
-  // БОЕВАЯ ФУНКЦИЯ СОХРАНЕНИЯ
+  // SAVE FUNCTION
   const handleSave = async () => {
     try {
       setIsSubmitting(true)

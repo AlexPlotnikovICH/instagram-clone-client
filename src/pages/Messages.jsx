@@ -3,10 +3,8 @@ import { Info } from 'lucide-react'
 import Footer from '../components/Footer'
 
 export default function Messages() {
-  // "пульт" для футера
   const { onOpenCreate, onToggleDrawer } = useOutletContext()
 
-  // Фейковые чаты
   const chats = [
     {
       id: 1,
@@ -51,7 +49,7 @@ export default function Messages() {
   ]
   return (
     <div className='flex flex-col h-screen w-full bg-white relative'>
-      {/* ОВЕРЛЕЙ БЛОКИРОВКИ */}
+      {/* BLOCKING OVERLAY */}
       <div className='absolute inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-[2px]'>
         <div className='bg-white p-8 rounded-2xl shadow-xl max-w-md text-center border border-gray-100 flex flex-col items-center mx-4'>
           <div className='w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-6'>
@@ -71,9 +69,9 @@ export default function Messages() {
         </div>
       </div>
 
-      {/* ОСНОВНАЯ ЗОНА ЧАТОВ */}
+      {/* MAIN CHAT AREA */}
       <div className='flex flex-1 overflow-hidden opacity-40 pointer-events-none'>
-        {/* ЛЕВАЯ КОЛОНКА */}
+        {/* LEFT COLUMN */}
         <div className='w-[350px] border-r border-gray-200 flex flex-col'>
           <div className='p-6 flex justify-between items-center'>
             <h2 className='text-xl font-bold'>itcareerhub</h2>
@@ -105,7 +103,7 @@ export default function Messages() {
           </div>
         </div>
 
-        {/* ПРАВАЯ КОЛОНКА */}
+        {/* RIGHT COLUMN */}
         <div className='flex-1 flex flex-col'>
           <div className='flex items-center gap-3 p-4 border-b border-gray-100'>
             <img
@@ -174,7 +172,7 @@ export default function Messages() {
         </div>
       </div>
 
-      {/* ФУТЕР - Оставляем активным */}
+      {/* FOOTER - Keep active */}
       <div className='shrink-0 pb-4 relative z-50'>
         <Footer onOpenCreate={onOpenCreate} onToggleDrawer={onToggleDrawer} />
       </div>
