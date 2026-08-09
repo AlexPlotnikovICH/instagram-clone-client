@@ -14,7 +14,7 @@ export default defineConfig({
       // Intercept all requests starting with /api
       '/api': {
         // Redirect them to your backend
-        target: 'http://localhost:3333',
+        target: 'https://instagram-clone-api-3wxx.onrender.com',
         // Change the origin header so the server thinks the request is coming from itself
         changeOrigin: true,
       },
