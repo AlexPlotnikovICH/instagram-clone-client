@@ -82,7 +82,7 @@ export default function MainLayout() {
         />
       </div>
 
-      <main className='flex-1 ml-[250px]'>
+      <main className='flex-1 ml-0 pb-16 md:pb-0 md:ml-[80px] lg:ml-[250px] transition-all duration-300'>
         <Outlet
           context={{
             onOpenCreate: () => setIsCreatePostOpen(true),
@@ -100,9 +100,7 @@ export default function MainLayout() {
       )}
 
       {/* SEARCH DRAWER */}
-      <div
-        className={`fixed top-0 left-[250px] h-screen w-[400px] bg-white z-40 shadow-xl border-r border-gray-200 transition-transform duration-300 ease-in-out flex flex-col ${activeDrawer === 'search' ? 'translate-x-0' : '-translate-x-full'}`}
-      >
+      <div className={`fixed top-0 left-0 md:left-[80px] lg:left-[250px] h-screen w-full sm:w-[400px] bg-white z-40 shadow-xl border-r border-gray-200 transition-transform duration-300 ease-in-out flex flex-col ${activeDrawer === 'search' /* или 'notifications' */ ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className='p-6 flex flex-col h-full'>
           <h2 className='text-2xl font-bold mb-8'>Search</h2>
           <div className='relative mb-6'>
@@ -167,11 +165,8 @@ export default function MainLayout() {
         </div>
       </div>
 
-      {/* NOTIFICATIONS DRAWER */}
-      <div
-        className={`fixed top-0 left-[250px] h-screen w-[400px] bg-white z-40 shadow-xl border-r border-gray-200 transition-transform duration-300 ease-in-out flex flex-col ${activeDrawer === 'notifications' ? 'translate-x-0' : '-translate-x-full'}`}
-      >
-        <div className='p-6 flex flex-col h-full'>
+{/* NOTIFICATIONS DRAWER */}
+      <div className={`fixed top-0 left-0 md:left-[80px] lg:left-[250px] h-screen w-full sm:w-[400px] bg-white z-40 shadow-xl border-r border-gray-200 transition-transform duration-300 ease-in-out flex flex-col ${activeDrawer === 'notifications' ? 'translate-x-0' : '-translate-x-full'}`}>        <div className='p-6 flex flex-col h-full'>
           <h2 className='text-2xl font-bold mb-6'>Notifications</h2>
           <div className='flex-1 overflow-y-auto -mx-6 px-6'>
             {isNotifLoading ? (

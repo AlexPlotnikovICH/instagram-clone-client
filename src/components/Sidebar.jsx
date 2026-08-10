@@ -63,19 +63,23 @@ export default function Sidebar({
     },
   ]
 
-  return (
-    <div className='fixed left-0 top-0 flex h-screen w-[250px] flex-col border-r border-gray-300 bg-white px-3 py-8'>
-      <Link to='/' className='mb-10 px-3'>
-        <img src={logo} alt='ICHGRAM' className='w-28' />
+return (
+    <div className='fixed bottom-0 left-0 z-50 flex w-full flex-row items-center justify-around border-t border-gray-200 bg-white px-2 py-2 md:top-0 md:h-screen md:w-[80px] md:flex-col md:justify-start md:border-r md:border-t-0 md:px-3 md:py-8 lg:w-[250px]'>
+      
+      {/* Логотип: скрываем на мобилках, показываем сокращенно на планшетах, полностью на десктопе */}
+      <Link to='/' className='hidden md:flex mb-10 px-0 lg:px-3 justify-center lg:justify-start'>
+        <img src={logo} alt='ICHGRAM' className='hidden lg:block w-28' />
+        <span className='block lg:hidden font-bold text-2xl italic'>IG</span>
       </Link>
 
-      <nav className='flex flex-col gap-1 flex-1'>
+      <nav className='flex flex-row w-full justify-around md:flex-col md:gap-1 md:flex-1'>
         {menuItems.map(item => {
           const isActive = item.path
             ? location.pathname === item.path
             : activeDrawer === item.name.toLowerCase()
 
-          const commonClasses = `flex items-center gap-4 rounded-md p-3 transition-colors hover:bg-gray-100 w-full text-left cursor-pointer relative ${
+          // Классы подстраиваются под мобилки (justify-center, w-auto) и десктоп (lg:justify-start, w-full)
+          const commonClasses = `flex items-center justify-center lg:justify-start gap-4 rounded-md p-3 transition-colors hover:bg-gray-100 w-auto md:w-full text-left cursor-pointer relative ${
             isActive ? 'font-bold' : 'font-normal'
           }`
 
@@ -119,7 +123,8 @@ export default function Sidebar({
           const content = (
             <>
               {renderIcon()}
-              <span className='text-[16px]'>{item.name}</span>
+              {/* Текст скрыт на мобилках и планшетах, виден только на десктопе */}
+              <span className='hidden lg:block text-[16px]'>{item.name}</span>
             </>
           )
 
@@ -145,10 +150,10 @@ export default function Sidebar({
 
       <button
         onClick={handleLogout}
-        className='flex items-center gap-4 rounded-md p-3 transition-colors hover:bg-gray-100 w-full text-left cursor-pointer mt-auto text-gray-700 hover:text-red-500 hover:bg-red-50 group'
+        className='hidden md:flex items-center justify-center lg:justify-start gap-4 rounded-md p-3 transition-colors hover:bg-gray-100 w-full text-left cursor-pointer mt-auto text-gray-700 hover:text-red-500 hover:bg-red-50 group'
       >
         <LogOut size={24} className='group-hover:text-red-500' />
-        <span className='text-[16px] font-normal'>Log out</span>
+        <span className='hidden lg:block text-[16px] font-normal'>Log out</span>
       </button>
     </div>
   )

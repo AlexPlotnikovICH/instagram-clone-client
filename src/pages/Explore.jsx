@@ -7,7 +7,7 @@ export default function Explore() {
   const [explorePosts, setExplorePosts] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
-  // 2. Added state for opening a post
+  // Added state for opening a post
   const [selectedPost, setSelectedPost] = useState(null)
 
   useEffect(() => {
@@ -27,8 +27,8 @@ export default function Explore() {
   }, [])
 
   return (
-    <div className='flex flex-col w-full pt-10 pb-20 pl-25'>
-      <div className='w-full max-w-[935px]'>
+    <div className='flex flex-col w-full pt-4 sm:pt-10 pb-20 px-1 sm:px-8 lg:px-24'>
+      <div className='w-full max-w-[935px] mx-auto'>
         {isLoading ? (
           <div className='text-center text-gray-500 py-10 font-semibold'>
             Loading posts...
@@ -38,15 +38,16 @@ export default function Explore() {
             No posts found.
           </div>
         ) : (
-          <div className='grid grid-cols-3 gap-1 auto-rows-[300px]'>
+          <div className='grid grid-cols-3 gap-1 md:auto-rows-[300px]'>
             {explorePosts.map((post, index) => {
+              // Каскад оставляем только для десктопа
               const isLarge = index % 10 === 2 || index % 10 === 5
 
               return (
                 <div
                   key={post._id}
-                  onClick={() => setSelectedPost(post)} // 3. Added click handler
-                  className={`relative group cursor-pointer bg-gray-100 ${isLarge ? 'row-span-2' : ''}`}
+                  onClick={() => setSelectedPost(post)}
+                  className={`relative group cursor-pointer bg-gray-100 aspect-square md:aspect-auto ${isLarge ? 'md:row-span-2' : ''}`}
                 >
                   <img
                     src={post.image}
@@ -70,7 +71,7 @@ export default function Explore() {
         </div>
       </div>
 
-      {/* 4. Render the modal window if a post is selected */}
+      {/* Render the modal window if a post is selected */}
       {selectedPost && (
         <PostModal post={selectedPost} onClose={() => setSelectedPost(null)} />
       )}

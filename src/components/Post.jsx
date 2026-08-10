@@ -101,8 +101,7 @@ export default function Post({ post }) {
   }
 
   return (
-    <div className='flex w-[404px] flex-col border-b border-gray-200 pb-3'>
-      {/* 1. HEADER */}
+<div className='flex w-full max-w-[404px] flex-col border-b border-gray-200 pb-3 mx-auto'>      {/* 1. HEADER */}
       <div className='flex items-center justify-between py-3 px-1'>
         <div className='flex items-center gap-3'>
           <Link to={profileUrl}>
@@ -144,9 +143,9 @@ export default function Post({ post }) {
 
       {/* 2. IMAGE WITH DOUBLE-CLICK */}
       <div
-        className='relative w-full h-[500px] bg-gray-100 rounded-sm overflow-hidden border border-gray-200 cursor-pointer touch-manipulation flex items-center justify-center group'
-        onDoubleClick={handleDoubleClick}
-      >
+  className='relative w-full h-[400px] sm:h-[500px] bg-gray-100 rounded-sm overflow-hidden border border-gray-200 cursor-pointer touch-manipulation flex items-center justify-center group'
+  onDoubleClick={handleDoubleClick}
+>
         <img
           src={post.image}
           alt='post content'

@@ -106,10 +106,10 @@ export default function Profile() {
   }
 
   return (
-    <div className='flex flex-col w-full min-h-screen pt-10 pb-10 pl-25 bg-white'>
-      <div className='w-full max-w-[935px] pr-4 flex flex-col flex-1'>
-        <header className='flex gap-8 md:gap-20 mb-10 items-start px-4 md:px-0'>
-          <div className='flex-shrink-0'>
+<div className='flex flex-col w-full min-h-screen pt-4 sm:pt-10 pb-20 sm:pb-10 px-4 sm:px-8 lg:px-24 bg-white'>      
+<div className='w-full max-w-[935px] mx-auto flex flex-col flex-1'>
+<header className='flex flex-col sm:flex-row gap-6 md:gap-20 mb-10 items-center sm:items-start px-0'>          
+  <div className='flex-shrink-0'>
             <img
               src={
                 profileUser.profile_image ||

@@ -47,8 +47,7 @@ export default function Feed() {
   }
 
   return (
-    <div className='flex flex-col min-h-screen w-full items-start pl-24 bg-transparent pt-10'>
-      <div className='flex flex-col w-full max-w-[847px]'>
+<div className='flex flex-col min-h-screen w-full items-center lg:items-start px-0 sm:px-4 lg:pl-24 bg-transparent pt-4 sm:pt-10'>      <div className='flex flex-col w-full max-w-[847px]'>
         <div className='grid grid-cols-1 xl:grid-cols-2 gap-[39px] pb-10'>
           {/* Use _id from MongoDB as the key */}
           {posts.map(post => (
