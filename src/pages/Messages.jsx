@@ -48,7 +48,7 @@ export default function Messages() {
     },
   ]
   return (
-    <div className='flex flex-col h-screen w-full bg-white relative'>
+    <div className='flex flex-col h-full min-h-[80vh] w-full bg-white relative'>
       {/* BLOCKING OVERLAY */}
       <div className='absolute inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-[2px]'>
         <div className='bg-white p-8 rounded-2xl shadow-xl max-w-md text-center border border-gray-100 flex flex-col items-center mx-4'>
@@ -71,8 +71,8 @@ export default function Messages() {
 
       {/* MAIN CHAT AREA */}
       <div className='flex flex-1 overflow-hidden opacity-40 pointer-events-none'>
-        {/* LEFT COLUMN */}
-        <div className='w-[350px] border-r border-gray-200 flex flex-col'>
+        {/* LEFT COLUMN - на мобилках занимает 100% */}
+        <div className='w-full md:w-[350px] border-r border-gray-200 flex flex-col'>
           <div className='p-6 flex justify-between items-center'>
             <h2 className='text-xl font-bold'>itcareerhub</h2>
           </div>
@@ -104,7 +104,7 @@ export default function Messages() {
         </div>
 
         {/* RIGHT COLUMN */}
-        <div className='flex-1 flex flex-col'>
+        <div className='hidden md:flex flex-1 flex-col'>
           <div className='flex items-center gap-3 p-4 border-b border-gray-100'>
             <img
               src='https://i.pravatar.cc/150?img=12'

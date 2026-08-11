@@ -10,16 +10,12 @@ export default function MainLayout() {
   const [activeDrawer, setActiveDrawer] = useState(null)
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false)
 
-  // --- SEARCH LOGIC ---
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [isSearchLoading, setIsSearchLoading] = useState(false)
 
-  // --- NOTIFICATION LOGIC (Zustand + local loader) ---
   const notifications = useNotificationStore(state => state.notifications)
-  const fetchNotifications = useNotificationStore(
-    state => state.fetchNotifications,
-  )
+  const fetchNotifications = useNotificationStore(state => state.fetchNotifications)
   const markAsRead = useNotificationStore(state => state.markAsRead)
   const [isNotifLoading, setIsNotifLoading] = useState(false)
 
@@ -29,7 +25,6 @@ export default function MainLayout() {
     setActiveDrawer(prev => (prev === drawerName ? null : drawerName))
   }
 
-  // Effect: Search (Debounce)
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSearchResults([])
@@ -51,15 +46,12 @@ export default function MainLayout() {
     return () => clearTimeout(delayDebounceFn)
   }, [searchQuery])
 
-  // Effect: Load notifications and reset the red dot
   useEffect(() => {
     if (activeDrawer === 'notifications') {
       const loadData = async () => {
         setIsNotifLoading(true)
         await fetchNotifications()
         setIsNotifLoading(false)
-
-        // Turn off the red dot in the sidebar only AFTER the data has loaded.
         markAsRead()
       }
       loadData()
@@ -73,8 +65,8 @@ export default function MainLayout() {
   }
 
   return (
-    <div className='flex bg-gray-50 min-h-screen'>
-      <div className='z-50 relative'>
+    <div className='flex flex-col-reverse md:flex-row h-[100dvh] w-full overflow-hidden bg-gray-50 relative'>
+      <div className='z-50 shrink-0 w-full md:w-[80px] lg:w-[250px] bg-white'>
         <Sidebar
           onToggleDrawer={toggleDrawer}
           activeDrawer={activeDrawer}
@@ -82,7 +74,7 @@ export default function MainLayout() {
         />
       </div>
 
-      <main className='flex-1 ml-0 pb-16 md:pb-0 md:ml-[80px] lg:ml-[250px] transition-all duration-300'>
+      <main className='flex-1 overflow-y-auto overflow-x-hidden min-w-0 relative w-full'>
         <Outlet
           context={{
             onOpenCreate: () => setIsCreatePostOpen(true),
@@ -91,18 +83,22 @@ export default function MainLayout() {
         />
       </main>
 
-      {/* OVERLAY */}
       {activeDrawer !== null && (
         <div
-          className='fixed inset-0 bg-black/40 z-30 transition-opacity cursor-pointer'
+          className='fixed inset-0 bg-black/40 z-30 transition-opacity cursor-pointer md:ml-[80px] lg:ml-[250px]'
           onClick={() => setActiveDrawer(null)}
         ></div>
       )}
 
-      {/* SEARCH DRAWER */}
-      <div className={`fixed top-0 left-0 md:left-[80px] lg:left-[250px] h-screen w-full sm:w-[400px] bg-white z-40 shadow-xl border-r border-gray-200 transition-transform duration-300 ease-in-out flex flex-col ${activeDrawer === 'search' /* или 'notifications' */ ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className={`fixed top-0 left-0 md:left-[80px] lg:left-[250px] h-[100dvh] w-full sm:w-[400px] bg-white z-40 shadow-xl border-r border-gray-200 transition-transform duration-300 ease-in-out flex flex-col ${activeDrawer === 'search' ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className='p-6 flex flex-col h-full'>
-          <h2 className='text-2xl font-bold mb-8'>Search</h2>
+          <div className='flex justify-between items-center mb-8'>
+            <h2 className='text-2xl font-bold'>Search</h2>
+            <button onClick={() => toggleDrawer('search')} className='md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors'>
+              <X size={24} />
+            </button>
+          </div>
+          
           <div className='relative mb-6'>
             <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
               <Search size={16} className='text-gray-400' />
@@ -165,9 +161,14 @@ export default function MainLayout() {
         </div>
       </div>
 
-{/* NOTIFICATIONS DRAWER */}
-      <div className={`fixed top-0 left-0 md:left-[80px] lg:left-[250px] h-screen w-full sm:w-[400px] bg-white z-40 shadow-xl border-r border-gray-200 transition-transform duration-300 ease-in-out flex flex-col ${activeDrawer === 'notifications' ? 'translate-x-0' : '-translate-x-full'}`}>        <div className='p-6 flex flex-col h-full'>
-          <h2 className='text-2xl font-bold mb-6'>Notifications</h2>
+      <div className={`fixed top-0 left-0 md:left-[80px] lg:left-[250px] h-[100dvh] w-full sm:w-[400px] bg-white z-40 shadow-xl border-r border-gray-200 transition-transform duration-300 ease-in-out flex flex-col ${activeDrawer === 'notifications' ? 'translate-x-0' : '-translate-x-full'}`}>        
+        <div className='p-6 flex flex-col h-full'>
+          <div className='flex justify-between items-center mb-6'>
+            <h2 className='text-2xl font-bold'>Notifications</h2>
+             <button onClick={() => toggleDrawer('notifications')} className='md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors'>
+              <X size={24} />
+            </button>
+          </div>
           <div className='flex-1 overflow-y-auto -mx-6 px-6'>
             {isNotifLoading ? (
               <div className='text-center mt-10 text-gray-500'>Loading...</div>

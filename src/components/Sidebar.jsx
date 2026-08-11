@@ -63,23 +63,25 @@ export default function Sidebar({
     },
   ]
 
-return (
-    <div className='fixed bottom-0 left-0 z-50 flex w-full flex-row items-center justify-around border-t border-gray-200 bg-white px-2 py-2 md:top-0 md:h-screen md:w-[80px] md:flex-col md:justify-start md:border-r md:border-t-0 md:px-3 md:py-8 lg:w-[250px]'>
-      
-      {/* Логотип: скрываем на мобилках, показываем сокращенно на планшетах, полностью на десктопе */}
+  return (
+    <div className='flex w-full flex-row items-center justify-between border-t border-gray-200 bg-white px-2 py-3 md:h-full md:flex-col md:justify-start md:border-r md:border-t-0 md:px-3 md:py-8'>
       <Link to='/' className='hidden md:flex mb-10 px-0 lg:px-3 justify-center lg:justify-start'>
         <img src={logo} alt='ICHGRAM' className='hidden lg:block w-28' />
         <span className='block lg:hidden font-bold text-2xl italic'>IG</span>
       </Link>
 
-      <nav className='flex flex-row w-full justify-around md:flex-col md:gap-1 md:flex-1'>
+      <nav 
+        className='flex flex-row w-full justify-around items-center md:flex-col md:gap-1 overflow-x-auto flex-nowrap'
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        <style dangerouslySetInnerHTML={{__html: `nav::-webkit-scrollbar { display: none; }`}} />
+        
         {menuItems.map(item => {
           const isActive = item.path
             ? location.pathname === item.path
             : activeDrawer === item.name.toLowerCase()
 
-          // Классы подстраиваются под мобилки (justify-center, w-auto) и десктоп (lg:justify-start, w-full)
-          const commonClasses = `flex items-center justify-center lg:justify-start gap-4 rounded-md p-3 transition-colors hover:bg-gray-100 w-auto md:w-full text-left cursor-pointer relative ${
+          const commonClasses = `flex items-center justify-center lg:justify-start md:gap-4 rounded-md p-2 md:p-3 transition-colors hover:bg-gray-100 shrink-0 md:w-full text-left cursor-pointer relative ${
             isActive ? 'font-bold' : 'font-normal'
           }`
 
@@ -99,7 +101,7 @@ return (
 
             const Icon = item.icon
             return (
-              <div className='relative'>
+              <div className='relative flex items-center justify-center'>
                 <Icon
                   size={24}
                   strokeWidth={isActive ? 3.0 : 2}
@@ -109,7 +111,6 @@ return (
                       : 'none'
                   }
                 />
-                {/* RED DOT */}
                 {item.name === 'Notifications' && hasUnread && (
                   <span className='absolute -top-1 -right-1 flex h-3 w-3'>
                     <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75'></span>
@@ -123,7 +124,6 @@ return (
           const content = (
             <>
               {renderIcon()}
-              {/* Текст скрыт на мобилках и планшетах, виден только на десктопе */}
               <span className='hidden lg:block text-[16px]'>{item.name}</span>
             </>
           )

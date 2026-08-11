@@ -5,6 +5,7 @@ import {
   useParams,
   useLocation,
   useOutletContext,
+  useNavigate,
 } from 'react-router-dom'
 import Footer from '../components/Footer'
 import PostModal from '../components/PostModal'
@@ -15,11 +16,13 @@ export default function Profile() {
   const { onOpenCreate, onToggleDrawer } = useOutletContext()
   const { username: urlUsername } = useParams()
   const location = useLocation()
+  
   const currentUser = useAuthStore(state => state.user)
+  const logout = useAuthStore(state => state.logout) 
+  const navigate = useNavigate()
   const updateFollowingCount = useAuthStore(state => state.updateFollowingCount)
 
-  const isOwnProfile =
-    location.pathname === '/profile' || urlUsername === currentUser?.username
+  const isOwnProfile = location.pathname === '/profile' || urlUsername === currentUser?.username
 
   const [profileUser, setProfileUser] = useState(null)
   const [userPosts, setUserPosts] = useState([])
@@ -31,10 +34,8 @@ export default function Profile() {
       try {
         setLoading(true)
         let targetUser = null
-        // 1. FETCH USER DATA
-        const usernameToFetch = isOwnProfile
-          ? currentUser?.username
-          : urlUsername
+        
+        const usernameToFetch = isOwnProfile ? currentUser?.username : urlUsername
 
         if (usernameToFetch) {
           const userRes = await api.get(`/users/${usernameToFetch}`)
@@ -43,7 +44,6 @@ export default function Profile() {
 
         setProfileUser(targetUser)
 
-        // 2. FETCH USER POSTS
         if (targetUser?._id) {
           const postsRes = await api.get(`/posts/user/${targetUser._id}`)
           setUserPosts(postsRes.data)
@@ -70,16 +70,12 @@ export default function Profile() {
         await api.post(`/users/follow/${profileUser._id}`)
       }
 
-      // Update local profile state
       setProfileUser(prev => ({
         ...prev,
         isFollowing: !wasFollowing,
-        followersCount: wasFollowing
-          ? prev.followersCount - 1
-          : prev.followersCount + 1,
+        followersCount: wasFollowing ? prev.followersCount - 1 : prev.followersCount + 1,
       }))
 
-      // Sync the global following count in useAuthStore
       if (updateFollowingCount) {
         updateFollowingCount(!wasFollowing)
       }
@@ -88,7 +84,6 @@ export default function Profile() {
     }
   }
 
-  // Render loading or error states
   if (loading && !profileUser) {
     return (
       <div className='pl-25 pt-10 font-semibold text-gray-500'>
@@ -106,10 +101,10 @@ export default function Profile() {
   }
 
   return (
-<div className='flex flex-col w-full min-h-screen pt-4 sm:pt-10 pb-20 sm:pb-10 px-4 sm:px-8 lg:px-24 bg-white'>      
-<div className='w-full max-w-[935px] mx-auto flex flex-col flex-1'>
-<header className='flex flex-col sm:flex-row gap-6 md:gap-20 mb-10 items-center sm:items-start px-0'>          
-  <div className='flex-shrink-0'>
+    <div className='flex flex-col w-full min-h-screen pt-4 sm:pt-10 pb-20 sm:pb-10 px-4 sm:px-8 lg:px-24 bg-white'>      
+      <div className='w-full max-w-[935px] mx-auto flex flex-col flex-1'>
+        <header className='flex flex-col sm:flex-row gap-6 md:gap-20 mb-10 items-center sm:items-start px-0'>          
+          <div className='flex-shrink-0'>
             <img
               src={
                 profileUser.profile_image ||
@@ -126,12 +121,23 @@ export default function Profile() {
                 {profileUser.username}
               </h2>
               {isOwnProfile ? (
-                <Link
-                  to='/profile/edit'
-                  className='bg-gray-100 hover:bg-gray-200 text-black px-4 py-1.5 rounded-lg font-semibold text-[14px] transition-colors cursor-pointer'
-                >
-                  Edit profile
-                </Link>
+                <div className='flex gap-2'>
+                  <Link
+                    to='/profile/edit'
+                    className='bg-gray-100 hover:bg-gray-200 text-black px-4 py-1.5 rounded-lg font-semibold text-[14px] transition-colors cursor-pointer'
+                  >
+                    Edit profile
+                  </Link>
+                  <button
+                    onClick={() => {
+                      logout()
+                      navigate('/login')
+                    }}
+                    className='md:hidden bg-red-50 hover:bg-red-100 text-red-500 px-4 py-1.5 rounded-lg font-semibold text-[14px] transition-colors cursor-pointer'
+                  >
+                    Log out
+                  </button>
+                </div>
               ) : (
                 <div className='flex gap-2'>
                   <button
@@ -178,7 +184,6 @@ export default function Profile() {
                 {profileUser.bio || 'No bio yet...'}
               </p>
 
-              {/* Render the link only if it exists */}
               {profileUser.website && (
                 <a
                   href={
@@ -191,7 +196,6 @@ export default function Profile() {
                   className='block mt-2 font-bold text-[#00376b] hover:underline flex items-center gap-1'
                 >
                   <LinkIcon size={14} className='rotate-45' />
-                  {/* Remove http(s):// for cleaner display */}
                   {profileUser.website.replace(/^https?:\/\//, '')}
                 </a>
               )}
