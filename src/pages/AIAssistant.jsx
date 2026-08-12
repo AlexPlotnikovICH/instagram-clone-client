@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Send, Sparkles } from 'lucide-react'
 
@@ -8,6 +8,16 @@ export default function AIAssistant() {
   ])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  
+  const messagesEndRef = useRef(null)
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages, isLoading])
 
   const quickReplies = [
     '📝 Generate hashtags & caption for a travel photo',
@@ -48,14 +58,12 @@ export default function AIAssistant() {
   }
 
   return (
-    <div className="flex flex-col h-screen w-full max-w-3xl mx-auto bg-white border-x border-gray-200">
-      {/* Header */}
+    <div className="flex flex-col h-full w-full max-w-3xl mx-auto bg-white border-x border-gray-200">
       <div className="flex items-center gap-2 p-4 border-b border-gray-200 bg-white">
         <Sparkles className="text-blue-500" />
         <h2 className="text-lg font-semibold">AI Assistant</h2>
       </div>
 
-      {/* Messages Area */}
       <div className="flex-1 p-4 overflow-y-auto bg-gray-50 flex flex-col gap-4">
         {messages.map((msg, index) => (
           <div 
@@ -84,11 +92,10 @@ export default function AIAssistant() {
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
       <div className="p-4 bg-white border-t border-gray-200">
-        {/* Quick Replies */}
         <div className="flex flex-wrap gap-2 mb-3">
           {quickReplies.map((reply, idx) => (
             <button
@@ -102,7 +109,6 @@ export default function AIAssistant() {
           ))}
         </div>
 
-        {/* Text Input */}
         <div className="flex items-center gap-2">
           <input
             type="text"

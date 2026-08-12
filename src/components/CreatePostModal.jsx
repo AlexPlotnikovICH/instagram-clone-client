@@ -95,20 +95,20 @@ export default function CreatePostModal({ isOpen, onClose }) {
       </button>
 
       <div
-        className='bg-white flex flex-col w-full max-w-[800px] max-h-[80vh] rounded-xl overflow-hidden relative'
+        className='bg-white flex flex-col w-full max-w-[800px] max-h-[85vh] rounded-xl overflow-hidden relative'
         onClick={e => e.stopPropagation()}
       >
         <div className='flex items-center justify-between p-3 border-b border-gray-200'>
-          <div className='w-10'></div>
-          <h1 className='font-bold text-[16px] flex-1 text-center'>
+          <div className='flex-1 flex justify-start'></div>
+          <h1 className='font-bold text-[16px] whitespace-nowrap px-2'>
             Create new post
           </h1>
-          <div className='w-10 text-right'>
+          <div className='flex-1 flex justify-end'>
             {previewUrl && (
               <button
                 onClick={handleShare}
                 disabled={isSubmitting}
-                className='text-[#0095f6] font-semibold text-[14px] hover:text-blue-800 transition-colors disabled:opacity-50 flex items-center gap-1 justify-end w-full'
+                className='text-[#0095f6] font-semibold text-[14px] hover:text-blue-800 transition-colors disabled:opacity-50 flex items-center gap-1'
               >
                 {isSubmitting ? (
                   <Loader2 size={16} className='animate-spin' />
@@ -127,14 +127,14 @@ export default function CreatePostModal({ isOpen, onClose }) {
         )}
 
         {!previewUrl ? (
-          <div className='flex flex-col items-center justify-center p-20 min-h-[400px]'>
+          <div className='flex flex-col items-center justify-center p-10 md:p-20 min-h-[300px] md:min-h-[400px]'>
             <UploadCloud
               size={64}
               className='text-gray-800 mb-4'
               strokeWidth={1}
             />
-            <h2 className='text-xl font-normal mb-6'>
-              Drag photos and videos here
+            <h2 className='text-lg md:text-xl font-normal mb-6 text-center'>
+              Upload photos
             </h2>
             <input
               type='file'
@@ -147,12 +147,12 @@ export default function CreatePostModal({ isOpen, onClose }) {
               onClick={() => fileInputRef.current.click()}
               className='bg-[#0095f6] hover:bg-blue-600 text-white px-4 py-1.5 rounded-lg font-semibold text-[14px] transition-colors'
             >
-              Select from computer
+              Select from device
             </button>
           </div>
         ) : (
-          <div className='flex flex-col md:flex-row h-full max-h-[70vh]'>
-            <div className='w-full md:w-[60%] bg-gray-50 flex items-center justify-center border-r border-gray-200 min-h-[300px] relative'>
+          <div className='flex flex-col md:flex-row h-full max-h-[75vh] overflow-y-auto md:overflow-hidden'>
+            <div className='w-full md:w-[60%] bg-gray-50 flex items-center justify-center border-b md:border-b-0 md:border-r border-gray-200 min-h-[250px] md:min-h-[300px] relative shrink-0'>
               <img
                 src={previewUrl}
                 alt='Preview'
@@ -160,7 +160,7 @@ export default function CreatePostModal({ isOpen, onClose }) {
               />
             </div>
 
-            <div className='w-full md:w-[40%] flex flex-col bg-white'>
+            <div className='w-full md:w-[40%] flex flex-col bg-white shrink-0'>
               <div className='flex items-center gap-3 p-4'>
                 <img
                   src={
@@ -180,11 +180,11 @@ export default function CreatePostModal({ isOpen, onClose }) {
                 onChange={e => setCaption(e.target.value)}
                 placeholder='Write a caption...'
                 disabled={isSubmitting}
-                className='w-full flex-1 p-4 resize-none focus:outline-none text-[16px] disabled:bg-gray-50'
+                className='w-full min-h-[100px] md:flex-1 p-4 resize-none focus:outline-none text-[16px] disabled:bg-gray-50'
                 maxLength={2200}
               />
 
-              <div className='flex items-center justify-between p-4 border-t border-gray-200 text-gray-400'>
+              <div className='flex items-center justify-between p-4 border-t border-gray-200 text-gray-400 mt-auto'>
                 <Smile
                   size={20}
                   className='cursor-pointer hover:text-gray-600'
