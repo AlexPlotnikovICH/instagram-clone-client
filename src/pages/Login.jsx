@@ -10,8 +10,10 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isDemoSubmitting, setIsDemoSubmitting] = useState(false)
 
   const login = useAuthStore(state => state.login)
+  const demoLogin = useAuthStore(state => state.demoLogin)
   const navigate = useNavigate()
 
   const handleSubmit = async e => {
@@ -28,6 +30,22 @@ export default function Login() {
     } else {
       setError(response.error || 'Invalid email or password')
       setIsSubmitting(false)
+    }
+  }
+
+  const handleDemoLogin = async () => {
+    if (isDemoSubmitting) return
+
+    setIsDemoSubmitting(true)
+    setError('')
+
+    const response = await demoLogin()
+
+    if (response.success) {
+      navigate('/')
+    } else {
+      setError(response.error || 'Failed to login as demo user')
+      setIsDemoSubmitting(false)
     }
   }
 
@@ -55,7 +73,7 @@ export default function Login() {
                 placeholder='Username, or email'
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                disabled={isSubmitting}
+                disabled={isSubmitting || isDemoSubmitting}
                 className='w-full rounded-sm border border-gray-300 bg-gray-50 px-2 py-2 text-sm focus:border-gray-400 focus:outline-none disabled:opacity-70'
               />
               <input
@@ -63,13 +81,13 @@ export default function Login() {
                 placeholder='Password'
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                disabled={isSubmitting}
+                disabled={isSubmitting || isDemoSubmitting}
                 className='w-full rounded-sm border border-gray-300 bg-gray-50 px-2 py-2 text-sm focus:border-gray-400 focus:outline-none disabled:opacity-70'
               />
 
               <button
                 type='submit'
-                disabled={isSubmitting}
+                disabled={isSubmitting || isDemoSubmitting}
                 className='mt-2 flex w-full items-center justify-center gap-2 rounded-md bg-[#0095f6] py-1.5 text-sm font-semibold text-white hover:bg-[#1877f2] disabled:bg-blue-300'
               >
                 {isSubmitting && <Loader2 size={16} className='animate-spin' />}
@@ -78,7 +96,7 @@ export default function Login() {
             </form>
 
             {error && (
-              <p className='mt-4 text-xs text-red-500 text-center font-medium'>
+              <p className='mt-4 text-center text-xs font-medium text-red-500'>
                 {error}
               </p>
             )}
@@ -89,9 +107,19 @@ export default function Login() {
               <div className='h-px w-full bg-gray-300'></div>
             </div>
 
+            <button
+              type='button'
+              onClick={handleDemoLogin}
+              disabled={isDemoSubmitting || isSubmitting}
+              className='mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-gray-800 py-1.5 text-sm font-semibold text-white hover:bg-gray-900 disabled:bg-gray-400'
+            >
+              {isDemoSubmitting && <Loader2 size={16} className='animate-spin' />}
+              {isDemoSubmitting ? 'Loading...' : 'Log in as Demo Guest'}
+            </button>
+
             <Link
               to='/reset'
-              className='mt-10 text-[12px] text-[#00376b] hover:underline mb-2 block text-center'
+              className='mb-2 mt-6 block text-center text-[12px] text-[#00376b] hover:underline'
             >
               Forgot password?
             </Link>

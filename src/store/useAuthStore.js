@@ -25,7 +25,7 @@ const useAuthStore = create(set => ({
       const { token, ...userData } = response.data
 
       if (!token) {
-        throw new Error('Сервер не вернул токен')
+        throw new Error('Server did not return a token')
       }
 
       localStorage.setItem('token', token)
@@ -37,6 +37,29 @@ const useAuthStore = create(set => ({
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Login failed'
       console.error('Login Error:', errorMessage)
+      return { success: false, error: errorMessage }
+    }
+  },
+
+  demoLogin: async () => {
+    try {
+      const response = await api.post('/auth/demo-login')
+
+      const { token, ...userData } = response.data
+
+      if (!token) {
+        throw new Error('Server did not return a token')
+      }
+
+      localStorage.setItem('token', token)
+      localStorage.setItem('user', JSON.stringify(userData))
+
+      set({ user: userData, token, isAuthenticated: true })
+
+      return { success: true }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Demo login failed'
+      console.error('Demo Login Error:', errorMessage)
       return { success: false, error: errorMessage }
     }
   },
@@ -65,10 +88,12 @@ const useAuthStore = create(set => ({
     localStorage.removeItem('user')
     set({ user: null, token: null, isAuthenticated: false })
   },
+  
   updateUser: newUserData => {
     localStorage.setItem('user', JSON.stringify(newUserData))
     set({ user: newUserData })
   },
+  
   updateFollowingCount: isFollowing => {
     set(state => {
       if (!state.user) return state

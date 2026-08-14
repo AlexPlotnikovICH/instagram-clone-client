@@ -13,7 +13,7 @@ const useNotificationStore = create((set, get) => ({
 
       set({ notifications, hasUnread })
     } catch (error) {
-      console.error('Ошибка загрузки уведомлений:', error)
+      console.error('Error fetching notifications:', error)
     }
   },
 
@@ -26,7 +26,7 @@ const useNotificationStore = create((set, get) => ({
 
       set({ hasUnread: false })
     } catch (error) {
-      console.error('Ошибка при сбросе статуса:', error)
+      console.error('Error marking notifications as read:', error)
     }
   },
 }))
